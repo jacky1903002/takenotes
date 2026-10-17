@@ -137,7 +137,6 @@
                 <div class="p-4 border-b-2 border-deepBlack flex items-center justify-between">
                     <span class="text-xs font-black uppercase tracking-wider text-deepBlack">筆記清單</span>
                     <div class="flex items-center space-x-2">
-                        <!-- 清理舊筆記按鈕 -->
                         <button id="clean-old-notes-btn" class="px-2.5 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="清理舊筆記">
                             <i class="fa-solid fa-clock-rotate-left"></i>
                         </button>
@@ -152,10 +151,10 @@
                 </div>
             </aside>
 
-            <!-- 右側主區域 (編輯區 / 圖表區) -->
+            <!-- 右側主區域 -->
             <main class="flex-1 flex flex-col bg-creamBg overflow-hidden relative">
                 
-                <!-- 統計圖表面板 (預設隱藏) -->
+                <!-- 統計圖表面板 -->
                 <div id="stats-panel" class="absolute inset-0 bg-creamBg z-20 flex flex-col p-8 overflow-y-auto hidden">
                     <div class="flex items-center justify-between mb-6 border-b-2 border-deepBlack pb-4">
                         <div>
@@ -204,19 +203,16 @@
                         <input type="text" id="note-title-input" placeholder="文章標題..." class="text-xl font-black text-deepBlack bg-transparent border-none focus:outline-none w-full mr-4 placeholder:text-subBlack/30">
                         
                         <div class="flex items-center space-x-3 shrink-0">
-                            <!-- 儲存狀態與時間指示器 -->
                             <div class="text-right hidden sm:block">
                                 <div id="save-status" class="text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block">已儲存至雲端</div>
                                 <div id="last-saved-time" class="text-[10px] font-bold text-subBlack/60 mt-0.5">上次儲存: 尚未儲存</div>
                             </div>
                             
-                            <!-- 手動儲存按鈕 -->
                             <button id="save-note-btn" class="px-3.5 py-1.5 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none" title="儲存筆記">
                                 <i class="fa-solid fa-floppy-disk text-sm"></i>
                                 <span>儲存筆記</span>
                             </button>
 
-                            <!-- 刪除目前筆記按鈕 -->
                             <button id="delete-note-btn" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="刪除目前筆記">
                                 <i class="fa-solid fa-trash-can"></i>
                                 <span class="hidden md:inline">刪除筆記</span>
@@ -229,7 +225,6 @@
                         <div class="flex items-center space-x-3 w-full">
                             <i class="fa-solid fa-tags text-vibrantOrange"></i>
                             <span class="font-black shrink-0">標籤選單:</span>
-                            <!-- 下拉式選單 -->
                             <select id="note-tags-select" class="bg-creamBg border-2 border-deepBlack rounded-lg px-3 py-1 font-bold text-xs text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange cursor-pointer">
                                 <option value="工作">工作</option>
                                 <option value="個人成長">個人成長</option>
@@ -322,7 +317,17 @@
         let dailyChartInstance = null;
         let tagChartInstance = null;
 
-        // 雲端連線狀態
+        // **正確宣告與定義 updatePreviewAndStats() 函數**
+        function updatePreviewAndStats() {
+            const text = bodyInput.value || '';
+            previewEl.innerHTML = marked.parse(text);
+
+            const charCount = text.length;
+            const readTime = Math.ceil(charCount / 300);
+            noteStats.innerHTML = `<span>字數: <strong>${charCount}</strong></span><span>預估閱讀: <strong>${readTime}</strong> 分鐘</span>`;
+        }
+
+        // 雲端連線狀態監控
         onValue(ref(db, '.info/connected'), (snap) => {
             if (snap.val() === true) {
                 statusDot.className = "w-2.5 h-2.5 rounded-full bg-vibrantLime";
@@ -424,7 +429,6 @@
             selectNote(activeNoteId);
         });
 
-        // 清理舊筆記功能
         cleanOldNotesBtn.addEventListener('click', async () => {
             if (!currentUser) return;
             const days = prompt("請選擇要清理幾天前的舊筆記：\n輸入 30 (30天前), 90 (90天前), 或 180 (180天前)", "90");
@@ -549,7 +553,6 @@
             }, 1500);
         });
 
-        // 刪除目前正在編輯的筆記
         deleteBtn.addEventListener('click', async () => {
             if (!activeNoteId || !currentUser) return;
             if (confirm('確定要永久刪除目前這篇筆記嗎？')) {
