@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeNote Enterprise 3.2 - 隨手筆記</title>
+    <title>TakeNote Enterprise 3.3 - 隨手筆記</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -63,7 +63,7 @@
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-vibrantLime text-deepBlack border-2 border-deepBlack mb-4 shadow-[4px_4px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-feather-pointed text-3xl"></i>
                 </div>
-                <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro 3.2</h1>
+                <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro 3.3</h1>
                 <p class="text-sm font-bold text-subBlack/70 mt-1">企業級雲端隨手札記平台</p>
             </div>
             <form id="login-form" class="space-y-5">
@@ -91,12 +91,10 @@
                 <div class="w-10 h-10 rounded-xl bg-vibrantLime text-deepBlack border-2 border-deepBlack flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-feather-pointed"></i>
                 </div>
-                <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">v3.2 Pro</span></span>
+                <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">v3.3 Pro</span></span>
             </div>
 
-            <!-- 工具箱按鈕 (雲端狀態 / Excel / 圖表分析) -->
             <div class="flex items-center space-x-3">
-                <!-- 雲端連線狀態指示器 -->
                 <div id="connection-status" class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-creamBg rounded-xl border-2 border-deepBlack text-xs font-black">
                     <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse"></span>
                     <span id="status-text">連線中...</span>
@@ -104,12 +102,12 @@
 
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-deepBlack font-black text-sm"></i>
-                    <input type="text" id="search-input" placeholder="搜尋標題、內容或標籤..." class="pl-10 pr-4 py-2 bg-creamBg border-2 border-deepBlack rounded-xl text-sm font-bold text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange w-40 sm:w-56 placeholder:text-subBlack/40 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
+                    <input type="text" id="search-input" placeholder="搜尋標題、內容或標籤..." class="pl-10 pr-4 py-2 bg-creamBg border-2 border-deepBlack rounded-xl text-sm font-bold text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange w-36 sm:w-52 placeholder:text-subBlack/40 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                 </div>
                 
                 <button id="toggle-stats-btn" class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-chart-pie"></i>
-                    <span class="hidden md:inline">統計分析</span>
+                    <span class="hidden md:inline">統計</span>
                 </button>
 
                 <button id="export-excel-btn" class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="匯出 Excel">
@@ -138,10 +136,16 @@
             <aside class="w-80 border-r-2 border-deepBlack bg-creamCard flex flex-col shrink-0 z-10">
                 <div class="p-4 border-b-2 border-deepBlack flex items-center justify-between">
                     <span class="text-xs font-black uppercase tracking-wider text-deepBlack">筆記清單</span>
-                    <button id="new-note-btn" class="px-3.5 py-2 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
-                        <i class="fa-solid fa-plus font-black"></i>
-                        <span>建立筆記</span>
-                    </button>
+                    <div class="flex items-center space-x-2">
+                        <!-- 清理舊筆記按鈕 -->
+                        <button id="clean-old-notes-btn" class="px-2.5 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="清理舊筆記">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </button>
+                        <button id="new-note-btn" class="px-3.5 py-2 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
+                            <i class="fa-solid fa-plus font-black"></i>
+                            <span>建立</span>
+                        </button>
+                    </div>
                 </div>
                 <div id="notes-list" class="flex-1 overflow-y-auto divide-y-2 divide-deepBlack/10">
                     <!-- 動態渲染筆記列表 -->
@@ -212,9 +216,10 @@
                                 <span>儲存筆記</span>
                             </button>
 
-                            <!-- 刪除按鈕 -->
-                            <button id="delete-note-btn" class="p-2 text-deepBlack hover:text-vibrantOrange rounded-lg transition" title="刪除筆記">
-                                <i class="fa-solid fa-trash-can text-lg"></i>
+                            <!-- 刪除目前筆記按鈕 -->
+                            <button id="delete-note-btn" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="刪除目前筆記">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span class="hidden md:inline">刪除筆記</span>
                             </button>
                         </div>
                     </div>
@@ -286,6 +291,7 @@
         
         const notesListEl = document.getElementById('notes-list');
         const newNoteBtn = document.getElementById('new-note-btn');
+        const cleanOldNotesBtn = document.getElementById('clean-old-notes-btn');
         const emptyState = document.getElementById('empty-state');
         const editorContainer = document.getElementById('editor-container');
         const titleInput = document.getElementById('note-title-input');
@@ -299,11 +305,9 @@
         const searchInput = document.getElementById('search-input');
         const noteStats = document.getElementById('note-stats');
 
-        // Connection Status DOM
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
 
-        // Excel & Charts DOM
         const exportExcelBtn = document.getElementById('export-excel-btn');
         const importExcelInput = document.getElementById('import-excel-input');
         const toggleStatsBtn = document.getElementById('toggle-stats-btn');
@@ -318,7 +322,7 @@
         let dailyChartInstance = null;
         let tagChartInstance = null;
 
-        // 監控 Firebase 雲端連線狀態 (.info/connected)
+        // 雲端連線狀態
         onValue(ref(db, '.info/connected'), (snap) => {
             if (snap.val() === true) {
                 statusDot.className = "w-2.5 h-2.5 rounded-full bg-vibrantLime";
@@ -329,7 +333,6 @@
             }
         });
 
-        // Auth 監聽
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
@@ -421,6 +424,40 @@
             selectNote(activeNoteId);
         });
 
+        // 清理舊筆記功能
+        cleanOldNotesBtn.addEventListener('click', async () => {
+            if (!currentUser) return;
+            const days = prompt("請選擇要清理幾天前的舊筆記：\n輸入 30 (30天前), 90 (90天前), 或 180 (180天前)", "90");
+            if (!days || isNaN(days)) return;
+
+            const cutoffTime = Date.now() - (parseInt(days) * 24 * 60 * 60 * 1000);
+            const idsToDelete = Object.keys(notesData).filter(id => {
+                const noteTime = notesData[id].updatedAt || notesData[id].createdAt || 0;
+                return noteTime < cutoffTime;
+            });
+
+            if (idsToDelete.length === 0) {
+                alert(`沒有找到 ${days} 天前的舊筆記。`);
+                return;
+            }
+
+            if (confirm(`確定要永久刪除 ${idsToDelete.length} 篇超過 ${days} 天未更新的舊筆記嗎？`)) {
+                for (const id of idsToDelete) {
+                    const noteRef = ref(db, `users/${currentUser.uid}/notes/${id}`);
+                    await remove(noteRef);
+                    delete notesData[id];
+                }
+                if (activeNoteId && !notesData[activeNoteId]) {
+                    activeNoteId = null;
+                    editorContainer.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                }
+                renderNotesList();
+                renderCharts();
+                alert(`成功清理 ${idsToDelete.length} 篇舊筆記！`);
+            }
+        });
+
         function selectNote(id) {
             activeNoteId = id;
             const note = notesData[id];
@@ -433,7 +470,6 @@
             tagsSelect.value = note.tags || '工作';
             bodyInput.value = note.body || '';
 
-            // 更新上次儲存時間顯示
             if (note.updatedAt) {
                 const dateObj = new Date(note.updatedAt);
                 lastSavedTimeEl.textContent = `上次儲存: ${dateObj.toLocaleString('zh-TW', { hour12: false })}`;
@@ -448,7 +484,6 @@
             renderNotesList(searchInput.value);
         }
 
-        // 核心：儲存至 Firebase
         async function saveCurrentNoteToFirebase() {
             if (!activeNoteId || !currentUser) return;
 
@@ -472,7 +507,6 @@
                 const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
                 await update(noteRef, updatedNote);
 
-                // 更新畫面時間
                 const dateObj = new Date(now);
                 lastSavedTimeEl.textContent = `上次儲存: ${dateObj.toLocaleString('zh-TW', { hour12: false })}`;
                 
@@ -485,7 +519,6 @@
             }
         }
 
-        // 輸入防抖動自動儲存
         function handleInputChanges() {
             if (!activeNoteId || !currentUser) return;
 
@@ -502,7 +535,6 @@
         tagsSelect.addEventListener('change', handleInputChanges);
         bodyInput.addEventListener('input', handleInputChanges);
 
-        // 點擊「儲存筆記」按鈕手動儲存
         saveBtn.addEventListener('click', async () => {
             clearTimeout(saveTimeout);
             await saveCurrentNoteToFirebase();
@@ -517,18 +549,10 @@
             }, 1500);
         });
 
-        function updatePreviewAndStats() {
-            const text = bodyInput.value;
-            previewEl.innerHTML = marked.parse(text);
-
-            const charCount = text.length;
-            const readTime = Math.ceil(charCount / 300);
-            noteStats.innerHTML = `<span>字數: <strong>${charCount}</strong></span><span>預估閱讀: <strong>${readTime}</strong> 分鐘</span>`;
-        }
-
+        // 刪除目前正在編輯的筆記
         deleteBtn.addEventListener('click', async () => {
             if (!activeNoteId || !currentUser) return;
-            if (confirm('確定要刪除這篇筆記嗎？')) {
+            if (confirm('確定要永久刪除目前這篇筆記嗎？')) {
                 const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
                 await remove(noteRef);
                 delete notesData[activeNoteId];
@@ -542,7 +566,6 @@
 
         searchInput.addEventListener('input', (e) => renderNotesList(e.target.value));
 
-        // --- 匯出 Excel ---
         exportExcelBtn.addEventListener('click', () => {
             const exportData = Object.keys(notesData).map(id => {
                 const n = notesData[id];
@@ -562,7 +585,6 @@
             XLSX.writeFile(workbook, `TakeNote_Backup_${new Date().toISOString().slice(0,10)}.xlsx`);
         });
 
-        // --- 匯入 Excel ---
         importExcelInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file || !currentUser) return;
@@ -595,7 +617,6 @@
             reader.readAsBinaryString(file);
         });
 
-        // --- 統計分析圖表 ---
         toggleStatsBtn.addEventListener('click', () => {
             statsPanel.classList.remove('hidden');
             renderCharts();
