@@ -532,7 +532,7 @@
         }
 
         function handleInputChanges() {
-            if (!activeNoteId || !currentUser) return; // 確保有選取筆記才動作
+            if (!activeNoteId || !currentUser) return;
 
             saveStatus.textContent = "編輯中...";
             saveStatus.className = "text-xs font-black text-orange-700 bg-orange-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
