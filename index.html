@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeNote Enterprise 3.1 - 隨手筆記</title>
+    <title>TakeNote Enterprise 3.2 - 隨手筆記</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -63,7 +63,7 @@
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-vibrantLime text-deepBlack border-2 border-deepBlack mb-4 shadow-[4px_4px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-feather-pointed text-3xl"></i>
                 </div>
-                <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro 3.1</h1>
+                <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro 3.2</h1>
                 <p class="text-sm font-bold text-subBlack/70 mt-1">企業級雲端隨手札記平台</p>
             </div>
             <form id="login-form" class="space-y-5">
@@ -91,29 +91,35 @@
                 <div class="w-10 h-10 rounded-xl bg-vibrantLime text-deepBlack border-2 border-deepBlack flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-feather-pointed"></i>
                 </div>
-                <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">v3.1 Pro</span></span>
+                <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">v3.2 Pro</span></span>
             </div>
 
-            <!-- 工具箱按鈕 (Excel / 圖表分析) -->
+            <!-- 工具箱按鈕 (雲端狀態 / Excel / 圖表分析) -->
             <div class="flex items-center space-x-3">
+                <!-- 雲端連線狀態指示器 -->
+                <div id="connection-status" class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-creamBg rounded-xl border-2 border-deepBlack text-xs font-black">
+                    <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse"></span>
+                    <span id="status-text">連線中...</span>
+                </div>
+
                 <div class="relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-deepBlack font-black text-sm"></i>
-                    <input type="text" id="search-input" placeholder="搜尋標題、內容或標籤..." class="pl-10 pr-4 py-2 bg-creamBg border-2 border-deepBlack rounded-xl text-sm font-bold text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange w-48 sm:w-64 placeholder:text-subBlack/40 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
+                    <input type="text" id="search-input" placeholder="搜尋標題、內容或標籤..." class="pl-10 pr-4 py-2 bg-creamBg border-2 border-deepBlack rounded-xl text-sm font-bold text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange w-40 sm:w-56 placeholder:text-subBlack/40 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                 </div>
                 
                 <button id="toggle-stats-btn" class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-chart-pie"></i>
-                    <span class="hidden sm:inline">統計分析</span>
+                    <span class="hidden md:inline">統計分析</span>
                 </button>
 
                 <button id="export-excel-btn" class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="匯出 Excel">
                     <i class="fa-solid fa-file-excel text-green-700"></i>
-                    <span class="hidden sm:inline">匯出 Excel</span>
+                    <span class="hidden md:inline">匯出</span>
                 </button>
 
                 <label class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] cursor-pointer" title="匯入 Excel">
                     <i class="fa-solid fa-file-import text-blue-700"></i>
-                    <span class="hidden sm:inline">匯入 Excel</span>
+                    <span class="hidden md:inline">匯入</span>
                     <input type="file" id="import-excel-input" accept=".xlsx, .xls" class="hidden">
                 </label>
                 
@@ -121,7 +127,7 @@
 
                 <button id="logout-btn" class="flex items-center space-x-2 text-sm font-black text-deepBlack hover:text-vibrantOrange transition">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <span id="user-email-display" class="hidden md:inline"></span>
+                    <span id="user-email-display" class="hidden lg:inline"></span>
                 </button>
             </div>
         </header>
@@ -194,10 +200,13 @@
                         <input type="text" id="note-title-input" placeholder="文章標題..." class="text-xl font-black text-deepBlack bg-transparent border-none focus:outline-none w-full mr-4 placeholder:text-subBlack/30">
                         
                         <div class="flex items-center space-x-3 shrink-0">
-                            <!-- 儲存狀態指示燈 -->
-                            <span id="save-status" class="text-xs font-bold text-subBlack/60 bg-creamBg px-2.5 py-1 rounded-md border border-deepBlack/20">已儲存至雲端</span>
+                            <!-- 儲存狀態與時間指示器 -->
+                            <div class="text-right hidden sm:block">
+                                <div id="save-status" class="text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block">已儲存至雲端</div>
+                                <div id="last-saved-time" class="text-[10px] font-bold text-subBlack/60 mt-0.5">上次儲存: 尚未儲存</div>
+                            </div>
                             
-                            <!-- 新增：手動儲存按鈕 -->
+                            <!-- 手動儲存按鈕 -->
                             <button id="save-note-btn" class="px-3.5 py-1.5 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none" title="儲存筆記">
                                 <i class="fa-solid fa-floppy-disk text-sm"></i>
                                 <span>儲存筆記</span>
@@ -249,7 +258,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, get, push, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, get, push, remove, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBBDID8PF-0Ie-OKX9x4pQ3o0i49ozwH-8",
@@ -284,10 +293,15 @@
         const bodyInput = document.getElementById('note-body-input');
         const previewEl = document.getElementById('markdown-preview');
         const deleteBtn = document.getElementById('delete-note-btn');
-        const saveBtn = document.getElementById('save-note-btn'); // 儲存按鈕
+        const saveBtn = document.getElementById('save-note-btn');
         const saveStatus = document.getElementById('save-status');
+        const lastSavedTimeEl = document.getElementById('last-saved-time');
         const searchInput = document.getElementById('search-input');
         const noteStats = document.getElementById('note-stats');
+
+        // Connection Status DOM
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
 
         // Excel & Charts DOM
         const exportExcelBtn = document.getElementById('export-excel-btn');
@@ -303,6 +317,17 @@
         let saveTimeout = null;
         let dailyChartInstance = null;
         let tagChartInstance = null;
+
+        // 監控 Firebase 雲端連線狀態 (.info/connected)
+        onValue(ref(db, '.info/connected'), (snap) => {
+            if (snap.val() === true) {
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-vibrantLime";
+                statusText.textContent = "雲端已連線";
+            } else {
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-vibrantOrange";
+                statusText.textContent = "離線狀態";
+            }
+        });
 
         // Auth 監聽
         onAuthStateChanged(auth, (user) => {
@@ -380,12 +405,13 @@
 
         newNoteBtn.addEventListener('click', async () => {
             if (!currentUser) return;
+            const now = Date.now();
             const newNote = {
                 title: '未命名專案筆記',
                 body: '# 新筆記\n\n在這裡開始記錄您的想法與計畫...',
                 tags: '工作',
-                createdAt: Date.now(),
-                updatedAt: Date.now()
+                createdAt: now,
+                updatedAt: now
             };
             const notesRef = ref(db, `users/${currentUser.uid}/notes`);
             const newRef = push(notesRef);
@@ -407,55 +433,80 @@
             tagsSelect.value = note.tags || '工作';
             bodyInput.value = note.body || '';
 
+            // 更新上次儲存時間顯示
+            if (note.updatedAt) {
+                const dateObj = new Date(note.updatedAt);
+                lastSavedTimeEl.textContent = `上次儲存: ${dateObj.toLocaleString('zh-TW', { hour12: false })}`;
+            } else {
+                lastSavedTimeEl.textContent = `上次儲存: 剛剛`;
+            }
+
+            saveStatus.textContent = "已儲存至雲端";
+            saveStatus.className = "text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+
             updatePreviewAndStats();
             renderNotesList(searchInput.value);
         }
 
-        // 核心：立即儲存至 Realtime Database
+        // 核心：儲存至 Firebase
         async function saveCurrentNoteToFirebase() {
             if (!activeNoteId || !currentUser) return;
 
             saveStatus.textContent = "儲存中...";
+            saveStatus.className = "text-xs font-black text-yellow-700 bg-yellow-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
 
+            const now = Date.now();
             const updatedNote = {
                 ...notesData[activeNoteId],
                 title: titleInput.value,
                 tags: tagsSelect.value,
                 body: bodyInput.value,
-                updatedAt: Date.now()
+                updatedAt: now
             };
 
             notesData[activeNoteId] = updatedNote;
             updatePreviewAndStats();
             renderNotesList(searchInput.value);
 
-            const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
-            await update(noteRef, updatedNote);
-            saveStatus.textContent = "已儲存至雲端";
-            renderCharts();
+            try {
+                const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
+                await update(noteRef, updatedNote);
+
+                // 更新畫面時間
+                const dateObj = new Date(now);
+                lastSavedTimeEl.textContent = `上次儲存: ${dateObj.toLocaleString('zh-TW', { hour12: false })}`;
+                
+                saveStatus.textContent = "已儲存至雲端";
+                saveStatus.className = "text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+                renderCharts();
+            } catch (err) {
+                saveStatus.textContent = "儲存失敗";
+                saveStatus.className = "text-xs font-black text-red-700 bg-red-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+            }
         }
 
-        // 輸入內容時的自動儲存觸發（帶防抖 debounce）
+        // 輸入防抖動自動儲存
         function handleInputChanges() {
             if (!activeNoteId || !currentUser) return;
 
             saveStatus.textContent = "編輯中...";
+            saveStatus.className = "text-xs font-black text-orange-700 bg-orange-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
                 saveCurrentNoteToFirebase();
-            }, 800);
+            }, 1000);
         }
 
         titleInput.addEventListener('input', handleInputChanges);
         tagsSelect.addEventListener('change', handleInputChanges);
         bodyInput.addEventListener('input', handleInputChanges);
 
-        // 新增：點擊「儲存筆記」按鈕時立即執行手動儲存
+        // 點擊「儲存筆記」按鈕手動儲存
         saveBtn.addEventListener('click', async () => {
             clearTimeout(saveTimeout);
             await saveCurrentNoteToFirebase();
             
-            // 按鈕點擊視覺回饋
             const originalHtml = saveBtn.innerHTML;
             saveBtn.innerHTML = `<i class="fa-solid fa-check text-sm"></i><span>儲存成功</span>`;
             saveBtn.classList.replace('bg-vibrantLime', 'bg-green-400');
@@ -491,7 +542,7 @@
 
         searchInput.addEventListener('input', (e) => renderNotesList(e.target.value));
 
-        // --- 匯出 Excel 功能 ---
+        // --- 匯出 Excel ---
         exportExcelBtn.addEventListener('click', () => {
             const exportData = Object.keys(notesData).map(id => {
                 const n = notesData[id];
@@ -511,7 +562,7 @@
             XLSX.writeFile(workbook, `TakeNote_Backup_${new Date().toISOString().slice(0,10)}.xlsx`);
         });
 
-        // --- 匯入 Excel 功能 ---
+        // --- 匯入 Excel ---
         importExcelInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file || !currentUser) return;
@@ -525,12 +576,13 @@
 
                 if (rows.length > 0 && confirm(`準備匯入 ${rows.length} 筆筆記，是否繼續？`)) {
                     for (const row of rows) {
+                        const now = Date.now();
                         const newNote = {
                             title: row["標題"] || '匯入筆記',
                             tags: row["標籤"] || '工作',
                             body: row["內容"] || '',
-                            createdAt: Date.now(),
-                            updatedAt: Date.now()
+                            createdAt: now,
+                            updatedAt: now
                         };
                         const notesRef = ref(db, `users/${currentUser.uid}/notes`);
                         const newRef = push(notesRef);
@@ -543,7 +595,7 @@
             reader.readAsBinaryString(file);
         });
 
-        // --- 圖表分析與 PNG 匯出 ---
+        // --- 統計分析圖表 ---
         toggleStatsBtn.addEventListener('click', () => {
             statsPanel.classList.remove('hidden');
             renderCharts();
@@ -554,7 +606,6 @@
             if (dailyChartInstance) dailyChartInstance.destroy();
             if (tagChartInstance) tagChartInstance.destroy();
 
-            // 1. 近 7 日資料統計
             const last7Days = [];
             const dayCounts = {};
             for (let i = 6; i >= 0; i--) {
@@ -565,7 +616,6 @@
                 dayCounts[dateStr] = 0;
             }
 
-            // 2. 標籤統計
             const tagCounts = { "工作": 0, "個人成長": 0, "理財": 0, "健康": 0, "運動": 0, "生活": 0 };
 
             Object.values(notesData).forEach(n => {
@@ -576,7 +626,6 @@
                 else tagCounts["工作"]++;
             });
 
-            // 繪製柱狀圖
             const ctx1 = document.getElementById('dailyChart').getContext('2d');
             dailyChartInstance = new Chart(ctx1, {
                 type: 'bar',
@@ -593,7 +642,6 @@
                 options: { responsive: true, plugins: { legend: { display: false } } }
             });
 
-            // 繪製圓餅圖
             const ctx2 = document.getElementById('tagChart').getContext('2d');
             tagChartInstance = new Chart(ctx2, {
                 type: 'doughnut',
@@ -610,7 +658,6 @@
             });
         }
 
-        // 一鍵匯出圖表 PNG
         exportChartPngBtn.addEventListener('click', () => {
             const chartNode = document.getElementById('dailyChart');
             const imageURI = chartNode.toDataURL("image/png");
