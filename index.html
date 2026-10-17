@@ -27,6 +27,8 @@
             }
         }
     </script>
+    <!-- Marked.js 穩定全域 UMD 版本 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- SheetJS (XLSX) for Excel Import/Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Chart.js for Statistics -->
@@ -252,12 +254,11 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs & App Logic (透過 ES Module 完美匯入 marked) -->
+    <!-- Firebase SDKs & App Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, set, get, push, remove, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBBDID8PF-0Ie-OKX9x4pQ3o0i49ozwH-8",
@@ -316,10 +317,10 @@
         let dailyChartInstance = null;
         let tagChartInstance = null;
 
-        // 預覽與字數計算函數 (使用 ES Module 導入的 marked)
+        // 預覽與字數計算函數 (安全呼叫全域 marked.parse)
         function updatePreviewAndStats() {
             const text = bodyInput.value || '';
-            previewEl.innerHTML = marked.parse(text);
+            previewEl.innerHTML = window.marked ? window.marked.parse(text) : text;
 
             const charCount = text.length;
             const readTime = Math.ceil(charCount / 300);
