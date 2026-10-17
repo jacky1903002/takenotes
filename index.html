@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeNote Enterprise 3.0 - 隨手筆記</title>
+    <title>TakeNote Enterprise 3.1 - 隨手筆記</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -63,7 +63,7 @@
                 <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-vibrantLime text-deepBlack border-2 border-deepBlack mb-4 shadow-[4px_4px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-feather-pointed text-3xl"></i>
                 </div>
-                <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro 3.0</h1>
+                <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro 3.1</h1>
                 <p class="text-sm font-bold text-subBlack/70 mt-1">企業級雲端隨手札記平台</p>
             </div>
             <form id="login-form" class="space-y-5">
@@ -91,7 +91,7 @@
                 <div class="w-10 h-10 rounded-xl bg-vibrantLime text-deepBlack border-2 border-deepBlack flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-feather-pointed"></i>
                 </div>
-                <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">v3.0 Pro</span></span>
+                <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">v3.1 Pro</span></span>
             </div>
 
             <!-- 工具箱按鈕 (Excel / 圖表分析) -->
@@ -192,8 +192,18 @@
                     <!-- 編輯器頂端工具列 -->
                     <div class="px-6 py-3 bg-creamCard border-b-2 border-deepBlack flex items-center justify-between shrink-0">
                         <input type="text" id="note-title-input" placeholder="文章標題..." class="text-xl font-black text-deepBlack bg-transparent border-none focus:outline-none w-full mr-4 placeholder:text-subBlack/30">
+                        
                         <div class="flex items-center space-x-3 shrink-0">
+                            <!-- 儲存狀態指示燈 -->
                             <span id="save-status" class="text-xs font-bold text-subBlack/60 bg-creamBg px-2.5 py-1 rounded-md border border-deepBlack/20">已儲存至雲端</span>
+                            
+                            <!-- 新增：手動儲存按鈕 -->
+                            <button id="save-note-btn" class="px-3.5 py-1.5 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none" title="儲存筆記">
+                                <i class="fa-solid fa-floppy-disk text-sm"></i>
+                                <span>儲存筆記</span>
+                            </button>
+
+                            <!-- 刪除按鈕 -->
                             <button id="delete-note-btn" class="p-2 text-deepBlack hover:text-vibrantOrange rounded-lg transition" title="刪除筆記">
                                 <i class="fa-solid fa-trash-can text-lg"></i>
                             </button>
@@ -274,6 +284,7 @@
         const bodyInput = document.getElementById('note-body-input');
         const previewEl = document.getElementById('markdown-preview');
         const deleteBtn = document.getElementById('delete-note-btn');
+        const saveBtn = document.getElementById('save-note-btn'); // 儲存按鈕
         const saveStatus = document.getElementById('save-status');
         const searchInput = document.getElementById('search-input');
         const noteStats = document.getElementById('note-stats');
@@ -400,8 +411,11 @@
             renderNotesList(searchInput.value);
         }
 
-        function handleInputChanges() {
+        // 核心：立即儲存至 Realtime Database
+        async function saveCurrentNoteToFirebase() {
             if (!activeNoteId || !currentUser) return;
+
+            saveStatus.textContent = "儲存中...";
 
             const updatedNote = {
                 ...notesData[activeNoteId],
@@ -415,19 +429,42 @@
             updatePreviewAndStats();
             renderNotesList(searchInput.value);
 
-            saveStatus.textContent = "儲存中...";
+            const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
+            await update(noteRef, updatedNote);
+            saveStatus.textContent = "已儲存至雲端";
+            renderCharts();
+        }
+
+        // 輸入內容時的自動儲存觸發（帶防抖 debounce）
+        function handleInputChanges() {
+            if (!activeNoteId || !currentUser) return;
+
+            saveStatus.textContent = "編輯中...";
             clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(async () => {
-                const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
-                await update(noteRef, updatedNote);
-                saveStatus.textContent = "已儲存至雲端";
-                renderCharts();
+            saveTimeout = setTimeout(() => {
+                saveCurrentNoteToFirebase();
             }, 800);
         }
 
         titleInput.addEventListener('input', handleInputChanges);
         tagsSelect.addEventListener('change', handleInputChanges);
         bodyInput.addEventListener('input', handleInputChanges);
+
+        // 新增：點擊「儲存筆記」按鈕時立即執行手動儲存
+        saveBtn.addEventListener('click', async () => {
+            clearTimeout(saveTimeout);
+            await saveCurrentNoteToFirebase();
+            
+            // 按鈕點擊視覺回饋
+            const originalHtml = saveBtn.innerHTML;
+            saveBtn.innerHTML = `<i class="fa-solid fa-check text-sm"></i><span>儲存成功</span>`;
+            saveBtn.classList.replace('bg-vibrantLime', 'bg-green-400');
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = originalHtml;
+                saveBtn.classList.replace('bg-green-400', 'bg-vibrantLime');
+            }, 1500);
+        });
 
         function updatePreviewAndStats() {
             const text = bodyInput.value;
