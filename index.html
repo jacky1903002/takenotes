@@ -1,19 +1,27 @@
 <!DOCTYPE html>
-<html lang="zh-TW" class="dark">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeNote - 個人雲端隨手筆記</title>
+    <title>TakeNote Enterprise - 隨手筆記</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#0f172a',
-                        darkCard: '#1e293b',
+                        creamBg: '#fbf9f5',      /* 溫潤米白底色 */
+                        creamCard: '#f4f0e6',    /* 質感淺米卡片 */
+                        creamHover: '#eadecd',   /* 互動懸停米色 */
+                        deepBlack: '#0d0d0d',    /* 深粗黑色標題與主字 */
+                        subBlack: '#262626',     /* 內文與次要字體 */
+                        vibrantLime: '#84cc16',  /* 活力黃綠色 */
+                        vibrantOrange: '#f97316' /* 自然活力橘 */
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                        mono: ['Fira Code', 'Consolas', 'monospace']
                     }
                 }
             }
@@ -23,31 +31,49 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.js"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #fbf9f5;
+            color: #0d0d0d;
+        }
+        /* Markdown 樣式優化 - 粗黑強烈風格 */
+        .prose h1, .prose h2, .prose h3, .prose h4 {
+            color: #0d0d0d !important;
+            font-weight: 800 !important;
+            margin-top: 1em !important;
+            margin-bottom: 0.5em !important;
+        }
+        .prose h1 { font-size: 1.75rem !important; border-bottom: 2px solid #0d0d0d; padding-bottom: 0.3rem; }
+        .prose h2 { font-size: 1.4rem !important; }
+        .prose strong { color: #0d0d0d !important; font-weight: 900 !important; }
+        .prose code { background: #eadecd; padding: 0.2rem 0.4rem; rounded: 0.25rem; font-weight: 700; color: #0d0d0d; }
+        .prose blockquote { border-left-color: #84cc16 !important; background: #f4f0e6; padding: 0.5rem 1rem; color: #262626; }
+    </style>
 </head>
-<body class="bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+<body class="bg-creamBg text-deepBlack min-h-screen flex flex-col font-sans selection:bg-vibrantLime selection:text-deepBlack">
 
     <!-- 登入畫面 (Authentication View) -->
-    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
-        <div class="bg-white dark:bg-darkCard p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700">
+    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-deepBlack/40 backdrop-blur-md p-4">
+        <div class="bg-creamBg p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md border-2 border-deepBlack">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-500 mb-4 text-2xl">
-                    <i class="fa-solid fa-note-sticky"></i>
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-vibrantLime text-deepBlack border-2 border-deepBlack mb-4 shadow-[4px_4px_0px_0px_rgba(13,13,13,1)]">
+                    <i class="fa-solid fa-feather-pointed text-3xl"></i>
                 </div>
-                <h1 class="text-2xl font-bold tracking-tight">TakeNote 雲端札記</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">請登入您的 Firebase 帳號以存取筆記</p>
+                <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro</h1>
+                <p class="text-sm font-bold text-subBlack/70 mt-1">企業級雲端隨手札記平台</p>
             </div>
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-5">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">電子郵件</label>
-                    <input type="email" id="login-email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    <label class="block text-xs font-black uppercase tracking-wider text-deepBlack mb-1.5">企業電子郵件</label>
+                    <input type="email" id="login-email" required class="w-full px-4 py-3.5 rounded-xl border-2 border-deepBlack bg-creamCard focus:outline-none focus:ring-2 focus:ring-vibrantOrange font-bold text-deepBlack text-sm placeholder:text-subBlack/40">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">密碼</label>
-                    <input type="password" id="login-password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    <label class="block text-xs font-black uppercase tracking-wider text-deepBlack mb-1.5">通行密碼</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-3.5 rounded-xl border-2 border-deepBlack bg-creamCard focus:outline-none focus:ring-2 focus:ring-vibrantOrange font-bold text-deepBlack text-sm">
                 </div>
-                <div id="auth-error" class="text-red-500 text-xs hidden"></div>
-                <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition shadow-lg shadow-indigo-500/25">
-                    登入系統
+                <div id="auth-error" class="text-vibrantOrange font-bold text-xs hidden"></div>
+                <button type="submit" class="w-full py-4 bg-vibrantOrange hover:bg-vibrantOrange/90 text-deepBlack font-black rounded-xl transition border-2 border-deepBlack shadow-[4px_4px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none text-base">
+                    登入 TakeNote
                 </button>
             </form>
         </div>
@@ -56,23 +82,23 @@
     <!-- 主介面 (Main App View) -->
     <div id="app-screen" class="hidden flex-1 flex flex-col h-screen overflow-hidden">
         <!-- 頂端導覽列 -->
-        <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-20">
+        <header class="h-16 border-b-2 border-deepBlack bg-creamCard px-6 flex items-center justify-between shrink-0 z-20">
             <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                <div class="w-10 h-10 rounded-xl bg-vibrantLime text-deepBlack border-2 border-deepBlack flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                     <i class="fa-solid fa-feather-pointed"></i>
                 </div>
-                <span class="font-bold text-lg tracking-tight">TakeNote</span>
+                <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">Enterprise</span></span>
             </div>
+
             <div class="flex items-center space-x-4">
                 <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="search-input" placeholder="搜尋標題、內文或標籤..." class="pl-9 pr-4 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-deepBlack font-black text-sm"></i>
+                    <input type="text" id="search-input" placeholder="搜尋標題、內容或標籤..." class="pl-10 pr-4 py-2 bg-creamBg border-2 border-deepBlack rounded-xl text-sm font-bold text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange w-64 placeholder:text-subBlack/40 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
                 </div>
-                <button id="dark-mode-toggle" class="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition">
-                    <i class="fa-solid fa-moon dark:fa-sun"></i>
-                </button>
-                <div class="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
-                <button id="logout-btn" class="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-300 hover:text-red-500 transition">
+                
+                <div class="h-6 w-0.5 bg-deepBlack/20"></div>
+
+                <button id="logout-btn" class="flex items-center space-x-2 text-sm font-black text-deepBlack hover:text-vibrantOrange transition">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     <span id="user-email-display" class="hidden sm:inline"></span>
                 </button>
@@ -82,59 +108,61 @@
         <!-- 內容工作區 -->
         <div class="flex-1 flex overflow-hidden">
             <!-- 左側筆記列表 -->
-            <aside class="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-darkCard flex flex-col shrink-0">
-                <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">所有筆記</span>
-                    <button id="new-note-btn" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition flex items-center space-x-1.5 shadow-sm">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>新增筆記</span>
+            <aside class="w-80 border-r-2 border-deepBlack bg-creamCard flex flex-col shrink-0">
+                <div class="p-4 border-b-2 border-deepBlack flex items-center justify-between">
+                    <span class="text-xs font-black uppercase tracking-wider text-deepBlack">筆記清單</span>
+                    <button id="new-note-btn" class="px-3.5 py-2 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
+                        <i class="fa-solid fa-plus font-black"></i>
+                        <span>建立筆記</span>
                     </button>
                 </div>
-                <div id="notes-list" class="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/50">
+                <div id="notes-list" class="flex-1 overflow-y-auto divide-y-2 divide-deepBlack/10">
                     <!-- 動態渲染筆記列表 -->
                 </div>
             </aside>
 
             <!-- 右側編輯與預覽區 -->
-            <main class="flex-1 flex flex-col bg-slate-50 dark:bg-darkBg overflow-hidden">
-                <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-slate-400">
-                    <i class="fa-regular fa-note-sticky text-6xl mb-4 opacity-30"></i>
-                    <p class="text-sm">請從左側選擇一篇筆記，或點擊「新增筆記」開始寫作</p>
+            <main class="flex-1 flex flex-col bg-creamBg overflow-hidden">
+                <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-deepBlack/40">
+                    <div class="w-20 h-20 rounded-3xl bg-creamHover border-2 border-deepBlack/20 flex items-center justify-center mb-4">
+                        <i class="fa-regular fa-note-sticky text-4xl text-deepBlack/40"></i>
+                    </div>
+                    <p class="text-base font-bold text-deepBlack">選擇或新增一篇筆記，開始寫作</p>
                 </div>
 
                 <div id="editor-container" class="flex-1 flex flex-col hidden h-full">
                     <!-- 編輯器上方工具列 -->
-                    <div class="px-6 py-3 bg-white dark:bg-darkCard border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-                        <input type="text" id="note-title-input" placeholder="輸入文章標題..." class="text-lg font-bold bg-transparent border-none focus:outline-none w-full mr-4">
+                    <div class="px-6 py-3 bg-creamCard border-b-2 border-deepBlack flex items-center justify-between shrink-0">
+                        <input type="text" id="note-title-input" placeholder="文章標題..." class="text-xl font-black text-deepBlack bg-transparent border-none focus:outline-none w-full mr-4 placeholder:text-subBlack/30">
                         <div class="flex items-center space-x-3 shrink-0">
-                            <span id="save-status" class="text-xs text-slate-400">已儲存至雲端</span>
-                            <button id="delete-note-btn" class="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-                                <i class="fa-solid fa-trash-can"></i>
+                            <span id="save-status" class="text-xs font-bold text-subBlack/60 bg-creamBg px-2.5 py-1 rounded-md border border-deepBlack/20">已儲存至雲端</span>
+                            <button id="delete-note-btn" class="p-2 text-deepBlack hover:text-vibrantOrange rounded-lg transition" title="刪除筆記">
+                                <i class="fa-solid fa-trash-can text-lg"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- 標籤與中繼資訊列 -->
-                    <div class="px-6 py-2 bg-white/50 dark:bg-darkCard/50 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
+                    <div class="px-6 py-2.5 bg-creamHover/60 border-b-2 border-deepBlack flex items-center justify-between text-xs font-bold text-deepBlack shrink-0">
                         <div class="flex items-center space-x-2 w-full">
-                            <i class="fa-solid fa-tags"></i>
-                            <input type="text" id="note-tags-input" placeholder="標籤 (用逗號分隔，例如: 生活, 閱讀, 攝影)" class="bg-transparent border-none focus:outline-none w-full">
+                            <i class="fa-solid fa-tags text-vibrantOrange"></i>
+                            <input type="text" id="note-tags-input" placeholder="新增標籤 (用逗號隔開，例如: 會議, 專案, 靈感)" class="bg-transparent border-none focus:outline-none w-full font-bold placeholder:text-subBlack/40">
                         </div>
-                        <div id="note-stats" class="shrink-0 space-x-3">
+                        <div id="note-stats" class="shrink-0 space-x-4 text-subBlack/70 font-bold">
                             <span>字數: 0</span>
-                            <span>閱讀時間: 0 分鐘</span>
+                            <span>預估閱讀: 0 分鐘</span>
                         </div>
                     </div>
 
                     <!-- 雙欄編輯與預覽 -->
                     <div class="flex-1 flex overflow-hidden">
                         <!-- Markdown 輸入框 -->
-                        <div class="flex-1 flex flex-col border-r border-slate-200 dark:border-slate-800">
-                            <textarea id="note-body-input" placeholder="開始撰寫您的 Markdown 筆記... (支援標題、列表、代碼塊、待辦事項)" class="flex-1 p-6 bg-transparent resize-none border-none focus:outline-none font-mono text-sm leading-relaxed"></textarea>
+                        <div class="flex-1 flex flex-col border-r-2 border-deepBlack bg-creamBg">
+                            <textarea id="note-body-input" placeholder="撰寫 Markdown 內容..." class="flex-1 p-6 bg-transparent resize-none border-none focus:outline-none font-mono text-sm font-semibold leading-relaxed text-deepBlack placeholder:text-subBlack/30"></textarea>
                         </div>
                         <!-- 即時預覽區 -->
-                        <div class="flex-1 flex flex-col bg-white dark:bg-darkCard overflow-y-auto p-6">
-                            <div id="markdown-preview" class="prose dark:prose-invert max-w-none text-sm"></div>
+                        <div class="flex-1 flex flex-col bg-creamCard overflow-y-auto p-6">
+                            <div id="markdown-preview" class="prose max-w-none text-sm text-subBlack font-medium"></div>
                         </div>
                     </div>
                 </div>
@@ -184,18 +212,12 @@
         const deleteBtn = document.getElementById('delete-note-btn');
         const saveStatus = document.getElementById('save-status');
         const searchInput = document.getElementById('search-input');
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
         const noteStats = document.getElementById('note-stats');
 
         let currentUser = null;
         let notesData = {};
         let activeNoteId = null;
         let saveTimeout = null;
-
-        // Dark Mode 切換
-        darkModeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-        });
 
         // 監聽 Auth 狀態
         onAuthStateChanged(auth, (user) => {
@@ -219,7 +241,7 @@
             try {
                 await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
             } catch (error) {
-                authError.textContent = "登入失敗：請檢查 Email 與密碼是否正確";
+                authError.textContent = "登入失敗：請確認帳號密碼是否正確";
                 authError.classList.remove('hidden');
             }
         });
@@ -248,7 +270,7 @@
             const sortedIds = Object.keys(notesData).sort((a, b) => (notesData[b].updatedAt || 0) - (notesData[a].updatedAt || 0));
 
             if (sortedIds.length === 0) {
-                notesListEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">尚無筆記紀錄</div>`;
+                notesListEl.innerHTML = `<div class="p-6 text-center text-xs font-bold text-subBlack/50">尚無筆記，請點擊新增</div>`;
                 return;
             }
 
@@ -265,13 +287,14 @@
                 const dateStr = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
 
                 const item = document.createElement('div');
-                item.className = `p-4 cursor-pointer transition hover:bg-slate-50 dark:hover:bg-slate-800/50 ${id === activeNoteId ? 'bg-indigo-50/50 dark:bg-indigo-950/30 border-l-4 border-indigo-600' : ''}`;
+                const isActive = id === activeNoteId;
+                item.className = `p-4 cursor-pointer transition ${isActive ? 'bg-vibrantLime/20 border-l-4 border-deepBlack font-black' : 'hover:bg-creamHover/60'}`;
                 item.innerHTML = `
-                    <div class="font-medium text-sm truncate mb-1">${escapeHtml(title)}</div>
-                    <div class="text-xs text-slate-400 truncate mb-2">${escapeHtml(body.substring(0, 50))}</div>
-                    <div class="flex items-center justify-between text-[10px] text-slate-400">
+                    <div class="font-black text-sm text-deepBlack truncate mb-1">${escapeHtml(title)}</div>
+                    <div class="text-xs font-semibold text-subBlack/70 truncate mb-2">${escapeHtml(body.substring(0, 45))}</div>
+                    <div class="flex items-center justify-between text-[11px] font-bold text-subBlack/60">
                         <span>${dateStr}</span>
-                        ${tags ? `<span class="bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full">${escapeHtml(tags.split(',')[0].trim())}</span>` : ''}
+                        ${tags ? `<span class="bg-vibrantOrange/20 text-deepBlack px-2 py-0.5 rounded border border-deepBlack/20">${escapeHtml(tags.split(',')[0].trim())}</span>` : ''}
                     </div>
                 `;
                 item.addEventListener('click', () => selectNote(id));
@@ -283,9 +306,9 @@
         newNoteBtn.addEventListener('click', async () => {
             if (!currentUser) return;
             const newNote = {
-                title: '未命名筆記',
-                body: '# 新筆記\n\n在這裡開始寫作...',
-                tags: '生活',
+                title: '未命名專案筆記',
+                body: '# 新筆記\n\n在這裡開始記錄您的想法與計畫...',
+                tags: '工作',
                 updatedAt: Date.now()
             };
             const notesRef = ref(db, `users/${currentUser.uid}/notes`);
@@ -310,7 +333,7 @@
             bodyInput.value = note.body || '';
 
             updatePreviewAndStats();
-            renderNotesList();
+            renderNotesList(searchInput.value);
         }
 
         // 即時輸入與自動儲存
@@ -346,16 +369,15 @@
             const text = bodyInput.value;
             previewEl.innerHTML = marked.parse(text);
 
-            // 字數與閱讀時間
             const charCount = text.length;
-            const readTime = Math.ceil(charCount / 300); // 假設每分鐘閱讀 300 字
-            noteStats.innerHTML = `<span>字數: ${charCount}</span><span>預估閱讀時間: ${readTime} 分鐘</span>`;
+            const readTime = Math.ceil(charCount / 300);
+            noteStats.innerHTML = `<span>字數: <strong>${charCount}</strong></span><span>預估閱讀: <strong>${readTime}</strong> 分鐘</span>`;
         }
 
         // 刪除筆記
         deleteBtn.addEventListener('click', async () => {
             if (!activeNoteId || !currentUser) return;
-            if (confirm('確定要刪除這篇筆記嗎？')) {
+            if (confirm('確定要刪除這篇筆記嗎？此操作無法復原。')) {
                 const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
                 await remove(noteRef);
                 delete notesData[activeNoteId];
@@ -372,7 +394,7 @@
         });
 
         function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(> /g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
     </script>
 </body>
