@@ -1,701 +1,647 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TakeNote Enterprise 3.3 - 隨手筆記</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        creamBg: '#fbf9f5',      /* 溫潤米白底色 */
-                        creamCard: '#f4f0e6',    /* 質感淺米卡片 */
-                        creamHover: '#eadecd',   /* 互動懸停米色 */
-                        deepBlack: '#0d0d0d',    /* 深粗黑色標題與主字 */
-                        subBlack: '#262626',     /* 內文與次要字體 */
-                        vibrantLime: '#84cc16',  /* 活力黃綠色 */
-                        vibrantOrange: '#f97316' /* 自然活力橘 */
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
-                        mono: ['Fira Code', 'Consolas', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Marked.js 穩定全域 UMD 版本 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- SheetJS (XLSX) for Excel Import/Export -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Chart.js for Statistics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background-color: #fbf9f5;
-            color: #0d0d0d;
-        }
-        /* Markdown 樣式優化 */
-        .prose h1, .prose h2, .prose h3, .prose h4 {
-            color: #0d0d0d !important;
-            font-weight: 800 !important;
-            margin-top: 1em !important;
-            margin-bottom: 0.5em !important;
-        }
-        .prose h1 { font-size: 1.75rem !important; border-bottom: 2px solid #0d0d0d; padding-bottom: 0.3rem; }
-        .prose h2 { font-size: 1.4rem !important; }
-        .prose strong { color: #0d0d0d !important; font-weight: 900 !important; }
-        .prose code { background: #eadecd; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-weight: 700; color: #0d0d0d; }
-        .prose blockquote { border-left-color: #84cc16 !important; background: #f4f0e6; padding: 0.5rem 1rem; color: #262626; }
-    </style>
-</head>
-<body class="bg-creamBg text-deepBlack min-h-screen flex flex-col font-sans selection:bg-vibrantLime selection:text-deepBlack">
-
-    <!-- 登入畫面 (Authentication View) -->
-    <div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-deepBlack/40 backdrop-blur-md p-4">
-        <div class="bg-creamBg p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md border-2 border-deepBlack">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-vibrantLime text-deepBlack border-2 border-deepBlack mb-4 shadow-[4px_4px_0px_0px_rgba(13,13,13,1)]">
-                    <i class="fa-solid fa-feather-pointed text-3xl"></i>
-                </div>
-                <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro 3.3</h1>
-                <p class="text-sm font-bold text-subBlack/70 mt-1">企業級雲端隨手札記平台</p>
+<!-- 登入畫面 (Authentication View) -->
+<div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-deepBlack/40 backdrop-blur-md p-4">
+    <div class="bg-creamBg p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md border-2 border-deepBlack">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-vibrantLime text-deepBlack border-2 border-deepBlack mb-4 shadow-[4px_4px_0px_0px_rgba(13,13,13,1)]">
+                <i class="fa-solid fa-feather-pointed text-3xl"></i>
             </div>
-            <form id="login-form" class="space-y-5">
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-wider text-deepBlack mb-1.5">企業電子郵件</label>
-                    <input type="email" id="login-email" required class="w-full px-4 py-3.5 rounded-xl border-2 border-deepBlack bg-creamCard focus:outline-none focus:ring-2 focus:ring-vibrantOrange font-bold text-deepBlack text-sm placeholder:text-subBlack/40">
-                </div>
-                <div>
-                    <label class="block text-xs font-black uppercase tracking-wider text-deepBlack mb-1.5">通行密碼</label>
-                    <input type="password" id="login-password" required class="w-full px-4 py-3.5 rounded-xl border-2 border-deepBlack bg-creamCard focus:outline-none focus:ring-2 focus:ring-vibrantOrange font-bold text-deepBlack text-sm">
-                </div>
-                <div id="auth-error" class="text-vibrantOrange font-bold text-xs hidden"></div>
-                <button type="submit" class="w-full py-4 bg-vibrantOrange hover:bg-vibrantOrange/90 text-deepBlack font-black rounded-xl transition border-2 border-deepBlack shadow-[4px_4px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none text-base">
-                    登入 TakeNote
-                </button>
-            </form>
+            <h1 class="text-3xl font-black text-deepBlack tracking-tight">TakeNote Pro 3.3</h1>
+            <p class="text-sm font-bold text-subBlack/70 mt-1">企業級雲端隨手札記平台</p>
         </div>
+        <form id="login-form" class="space-y-5">
+            <div>
+                <label class="block text-xs font-black uppercase tracking-wider text-deepBlack mb-1.5">企業電子郵件</label>
+                <input type="email" id="login-email" required class="w-full px-4 py-3.5 rounded-xl border-2 border-deepBlack bg-creamCard focus:outline-none focus:ring-2 focus:ring-vibrantOrange font-bold text-deepBlack text-sm placeholder:text-subBlack/40">
+            </div>
+            <div>
+                <label class="block text-xs font-black uppercase tracking-wider text-deepBlack mb-1.5">通行密碼</label>
+                <input type="password" id="login-password" required class="w-full px-4 py-3.5 rounded-xl border-2 border-deepBlack bg-creamCard focus:outline-none focus:ring-2 focus:ring-vibrantOrange font-bold text-deepBlack text-sm">
+            </div>
+            <div id="auth-error" class="text-vibrantOrange font-bold text-xs hidden"></div>
+            <button type="submit" class="w-full py-4 bg-vibrantOrange hover:bg-vibrantOrange/90 text-deepBlack font-black rounded-xl transition border-2 border-deepBlack shadow-[4px_4px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none text-base">
+                登入 TakeNote
+            </button>
+        </form>
     </div>
+</div>
 
-    <!-- 主介面 (Main App View) -->
-    <div id="app-screen" class="hidden flex-1 flex flex-col h-screen overflow-hidden">
-        <!-- 頂端導覽列 -->
-        <header class="h-16 border-b-2 border-deepBlack bg-creamCard px-6 flex items-center justify-between shrink-0 z-20">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-vibrantLime text-deepBlack border-2 border-deepBlack flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
-                    <i class="fa-solid fa-feather-pointed"></i>
-                </div>
-                <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">v3.3 Pro</span></span>
+<!-- 主介面 (Main App View) -->
+<div id="app-screen" class="hidden flex-1 flex flex-col h-screen overflow-hidden">
+    <!-- 頂端導覽列 -->
+    <header class="h-16 border-b-2 border-deepBlack bg-creamCard px-6 flex items-center justify-between shrink-0 z-20">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-vibrantLime text-deepBlack border-2 border-deepBlack flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
+                <i class="fa-solid fa-feather-pointed"></i>
+            </div>
+            <span class="font-black text-xl tracking-tight text-deepBlack">TakeNote <span class="text-xs bg-vibrantOrange text-deepBlack px-2 py-0.5 rounded-md border border-deepBlack font-bold ml-1">v3.3 Pro</span></span>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <div id="connection-status" class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-creamBg rounded-xl border-2 border-deepBlack text-xs font-black">
+                <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse"></span>
+                <span id="status-text">連線中...</span>
             </div>
 
-            <div class="flex items-center space-x-3">
-                <div id="connection-status" class="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-creamBg rounded-xl border-2 border-deepBlack text-xs font-black">
-                    <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse"></span>
-                    <span id="status-text">連線中...</span>
-                </div>
-
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-deepBlack font-black text-sm"></i>
-                    <input type="text" id="search-input" placeholder="搜尋標題、內容或標籤..." class="pl-10 pr-4 py-2 bg-creamBg border-2 border-deepBlack rounded-xl text-sm font-bold text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange w-36 sm:w-52 placeholder:text-subBlack/40 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
-                </div>
-                
-                <button id="toggle-stats-btn" class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <span class="hidden md:inline">統計</span>
-                </button>
-
-                <button id="export-excel-btn" class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="匯出 Excel">
-                    <i class="fa-solid fa-file-excel text-green-700"></i>
-                    <span class="hidden md:inline">匯出</span>
-                </button>
-
-                <label class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] cursor-pointer" title="匯入 Excel">
-                    <i class="fa-solid fa-file-import text-blue-700"></i>
-                    <span class="hidden md:inline">匯入</span>
-                    <input type="file" id="import-excel-input" accept=".xlsx, .xls" class="hidden">
-                </label>
-                
-                <div class="h-6 w-0.5 bg-deepBlack/20"></div>
-
-                <button id="logout-btn" class="flex items-center space-x-2 text-sm font-black text-deepBlack hover:text-vibrantOrange transition">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    <span id="user-email-display" class="hidden lg:inline"></span>
-                </button>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-deepBlack font-black text-sm"></i>
+                <input type="text" id="search-input" placeholder="搜尋標題、內容或標籤..." class="pl-10 pr-4 py-2 bg-creamBg border-2 border-deepBlack rounded-xl text-sm font-bold text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange w-36 sm:w-52 placeholder:text-subBlack/40 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
             </div>
-        </header>
+            
+            <button id="toggle-stats-btn" class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span class="hidden md:inline">統計</span>
+            </button>
 
-        <!-- 內容工作區 -->
-        <div class="flex-1 flex overflow-hidden relative">
-            <!-- 左側筆記列表 -->
-            <aside class="w-80 border-r-2 border-deepBlack bg-creamCard flex flex-col shrink-0 z-10">
-                <div class="p-4 border-b-2 border-deepBlack flex items-center justify-between">
-                    <span class="text-xs font-black uppercase tracking-wider text-deepBlack">筆記清單</span>
-                    <div class="flex items-center space-x-2">
-                        <button id="clean-old-notes-btn" class="px-2.5 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="清理舊筆記">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
+            <button id="export-excel-btn" class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="匯出 Excel">
+                <i class="fa-solid fa-file-excel text-green-700"></i>
+                <span class="hidden md:inline">匯出</span>
+            </button>
+
+            <label class="px-3 py-2 bg-creamHover hover:bg-creamHover/80 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] cursor-pointer" title="匯入 Excel">
+                <i class="fa-solid fa-file-import text-blue-700"></i>
+                <span class="hidden md:inline">匯入</span>
+                <input type="file" id="import-excel-input" accept=".xlsx, .xls" class="hidden">
+            </label>
+            
+            <div class="h-6 w-0.5 bg-deepBlack/20"></div>
+
+            <button id="logout-btn" class="flex items-center space-x-2 text-sm font-black text-deepBlack hover:text-vibrantOrange transition">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span id="user-email-display" class="hidden lg:inline"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 內容工作區 -->
+    <div class="flex-1 flex overflow-hidden relative">
+        <!-- 左側筆記列表 -->
+        <aside class="w-80 border-r-2 border-deepBlack bg-creamCard flex flex-col shrink-0 z-10">
+            <div class="p-4 border-b-2 border-deepBlack flex items-center justify-between">
+                <span class="text-xs font-black uppercase tracking-wider text-deepBlack">筆記清單</span>
+                <div class="flex items-center space-x-2">
+                    <button id="clean-old-notes-btn" class="px-2.5 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="清理舊筆記">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                    <button id="new-note-btn" class="px-3.5 py-2 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
+                        <i class="fa-solid fa-plus font-black"></i>
+                        <span>建立</span>
+                    </button>
+                </div>
+            </div>
+            <div id="notes-list" class="flex-1 overflow-y-auto divide-y-2 divide-deepBlack/10">
+                <!-- 動態渲染筆記列表 -->
+            </div>
+        </aside>
+
+        <!-- 右側主區域 -->
+        <main class="flex-1 flex flex-col bg-creamBg overflow-hidden relative">
+            
+            <!-- 統計圖表面板 -->
+            <div id="stats-panel" class="absolute inset-0 bg-creamBg z-20 flex flex-col p-8 overflow-y-auto hidden">
+                <div class="flex items-center justify-between mb-6 border-b-2 border-deepBlack pb-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-deepBlack">每日筆記數據統計</h2>
+                        <p class="text-xs font-bold text-subBlack/70 mt-1">分析您的每日寫作頻率與主題分佈</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button id="export-chart-png-btn" class="px-4 py-2 bg-vibrantOrange text-deepBlack font-black text-xs rounded-xl border-2 border-deepBlack shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] flex items-center space-x-2">
+                            <i class="fa-solid fa-image"></i>
+                            <span>一鍵匯出圖表 PNG</span>
                         </button>
-                        <button id="new-note-btn" class="px-3.5 py-2 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack text-xs font-black rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
-                            <i class="fa-solid fa-plus font-black"></i>
-                            <span>建立</span>
+                        <button id="close-stats-btn" class="p-2 text-deepBlack hover:text-vibrantOrange font-black text-lg">
+                            <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
                 </div>
-                <div id="notes-list" class="flex-1 overflow-y-auto divide-y-2 divide-deepBlack/10">
-                    <!-- 動態渲染筆記列表 -->
-                </div>
-            </aside>
 
-            <!-- 右側主區域 -->
-            <main class="flex-1 flex flex-col bg-creamBg overflow-hidden relative">
-                
-                <!-- 統計圖表面板 -->
-                <div id="stats-panel" class="absolute inset-0 bg-creamBg z-20 flex flex-col p-8 overflow-y-auto hidden">
-                    <div class="flex items-center justify-between mb-6 border-b-2 border-deepBlack pb-4">
-                        <div>
-                            <h2 class="text-2xl font-black text-deepBlack">每日筆記數據統計</h2>
-                            <p class="text-xs font-bold text-subBlack/70 mt-1">分析您的每日寫作頻率與主題分佈</p>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <button id="export-chart-png-btn" class="px-4 py-2 bg-vibrantOrange text-deepBlack font-black text-xs rounded-xl border-2 border-deepBlack shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] flex items-center space-x-2">
-                                <i class="fa-solid fa-image"></i>
-                                <span>一鍵匯出圖表 PNG</span>
-                            </button>
-                            <button id="close-stats-btn" class="p-2 text-deepBlack hover:text-vibrantOrange font-black text-lg">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
+                <div id="chart-container-node" class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 bg-creamCard rounded-2xl border-2 border-deepBlack shadow-[4px_4px_0px_0px_rgba(13,13,13,1)]">
+                    <div class="bg-creamBg p-4 rounded-xl border-2 border-deepBlack">
+                        <h3 class="text-sm font-black mb-4 flex items-center text-deepBlack">
+                            <i class="fa-solid fa-chart-column mr-2 text-vibrantOrange"></i>近 7 日每日新增筆記量
+                        </h3>
+                        <canvas id="dailyChart" class="max-h-64"></canvas>
                     </div>
-
-                    <div id="chart-container-node" class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 bg-creamCard rounded-2xl border-2 border-deepBlack shadow-[4px_4px_0px_0px_rgba(13,13,13,1)]">
-                        <div class="bg-creamBg p-4 rounded-xl border-2 border-deepBlack">
-                            <h3 class="text-sm font-black mb-4 flex items-center text-deepBlack">
-                                <i class="fa-solid fa-chart-column mr-2 text-vibrantOrange"></i>近 7 日每日新增筆記量
-                            </h3>
-                            <canvas id="dailyChart" class="max-h-64"></canvas>
-                        </div>
-                        <div class="bg-creamBg p-4 rounded-xl border-2 border-deepBlack">
-                            <h3 class="text-sm font-black mb-4 flex items-center text-deepBlack">
-                                <i class="fa-solid fa-chart-pie mr-2 text-vibrantLime"></i>筆記標籤分類佔比
-                            </h3>
-                            <canvas id="tagChart" class="max-h-64"></canvas>
-                        </div>
+                    <div class="bg-creamBg p-4 rounded-xl border-2 border-deepBlack">
+                        <h3 class="text-sm font-black mb-4 flex items-center text-deepBlack">
+                            <i class="fa-solid fa-chart-pie mr-2 text-vibrantLime"></i>筆記標籤分類佔比
+                        </h3>
+                        <canvas id="tagChart" class="max-h-64"></canvas>
                     </div>
                 </div>
+            </div>
 
-                <!-- 空白提示狀態 -->
-                <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-deepBlack/40">
-                    <div class="w-20 h-20 rounded-3xl bg-creamHover border-2 border-deepBlack/20 flex items-center justify-center mb-4">
-                        <i class="fa-regular fa-note-sticky text-4xl text-deepBlack/40"></i>
-                    </div>
-                    <p class="text-base font-bold text-deepBlack">選擇或新增一篇筆記，開始寫作</p>
+            <!-- 空白提示狀態 -->
+            <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-deepBlack/40">
+                <div class="w-20 h-20 rounded-3xl bg-creamHover border-2 border-deepBlack/20 flex items-center justify-center mb-4">
+                    <i class="fa-regular fa-note-sticky text-4xl text-deepBlack/40"></i>
                 </div>
+                <p class="text-base font-bold text-deepBlack">選擇或新增一篇筆記，開始寫作</p>
+            </div>
 
-                <!-- 編輯區 -->
-                <div id="editor-container" class="flex-1 flex flex-col hidden h-full">
-                    <!-- 編輯器頂端工具列 -->
-                    <div class="px-6 py-3 bg-creamCard border-b-2 border-deepBlack flex items-center justify-between shrink-0">
-                        <input type="text" id="note-title-input" placeholder="文章標題..." class="text-xl font-black text-deepBlack bg-transparent border-none focus:outline-none w-full mr-4 placeholder:text-subBlack/30">
+            <!-- 編輯區 -->
+            <div id="editor-container" class="flex-1 flex flex-col hidden h-full">
+                <!-- 編輯器頂端工具列 -->
+                <div class="px-6 py-3 bg-creamCard border-b-2 border-deepBlack flex items-center justify-between shrink-0">
+                    <input type="text" id="note-title-input" placeholder="文章標題..." class="text-xl font-black text-deepBlack bg-transparent border-none focus:outline-none w-full mr-4 placeholder:text-subBlack/30">
+                    
+                    <div class="flex items-center space-x-3 shrink-0">
+                        <div class="text-right hidden sm:block">
+                            <div id="save-status" class="text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block">已儲存至雲端</div>
+                            <div id="last-saved-time" class="text-[10px] font-bold text-subBlack/60 mt-0.5">上次儲存: 尚未儲存</div>
+                        </div>
                         
-                        <div class="flex items-center space-x-3 shrink-0">
-                            <div class="text-right hidden sm:block">
-                                <div id="save-status" class="text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block">已儲存至雲端</div>
-                                <div id="last-saved-time" class="text-[10px] font-bold text-subBlack/60 mt-0.5">上次儲存: 尚未儲存</div>
-                            </div>
-                            
-                            <button id="save-note-btn" class="px-3.5 py-1.5 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none" title="儲存筆記">
-                                <i class="fa-solid fa-floppy-disk text-sm"></i>
-                                <span>儲存筆記</span>
-                            </button>
+                        <button id="save-note-btn" class="px-3.5 py-1.5 bg-vibrantLime hover:bg-vibrantLime/90 text-deepBlack font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1.5 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none" title="儲存筆記">
+                            <i class="fa-solid fa-floppy-disk text-sm"></i>
+                            <span>儲存筆記</span>
+                        </button>
 
-                            <button id="delete-note-btn" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="刪除目前筆記">
-                                <i class="fa-solid fa-trash-can"></i>
-                                <span class="hidden md:inline">刪除筆記</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 標籤下拉選單與中繼資訊 -->
-                    <div class="px-6 py-2.5 bg-creamHover/60 border-b-2 border-deepBlack flex items-center justify-between text-xs font-bold text-deepBlack shrink-0">
-                        <div class="flex items-center space-x-3 w-full">
-                            <i class="fa-solid fa-tags text-vibrantOrange"></i>
-                            <span class="font-black shrink-0">標籤選單:</span>
-                            <select id="note-tags-select" class="bg-creamBg border-2 border-deepBlack rounded-lg px-3 py-1 font-bold text-xs text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange cursor-pointer">
-                                <option value="工作">工作</option>
-                                <option value="個人成長">個人成長</option>
-                                <option value="理財">理財</option>
-                                <option value="健康">健康</option>
-                                <option value="運動">運動</option>
-                                <option value="生活">生活</option>
-                            </select>
-                        </div>
-                        <div id="note-stats" class="shrink-0 space-x-4 text-subBlack/70 font-bold">
-                            <span>字數: 0</span>
-                            <span>預估閱讀: 0 分鐘</span>
-                        </div>
-                    </div>
-
-                    <!-- 雙欄編輯與預覽 -->
-                    <div class="flex-1 flex overflow-hidden">
-                        <div class="flex-1 flex flex-col border-r-2 border-deepBlack bg-creamBg">
-                            <textarea id="note-body-input" placeholder="撰寫 Markdown 內容..." class="flex-1 p-6 bg-transparent resize-none border-none focus:outline-none font-mono text-sm font-semibold leading-relaxed text-deepBlack placeholder:text-subBlack/30"></textarea>
-                        </div>
-                        <div class="flex-1 flex flex-col bg-creamCard overflow-y-auto p-6">
-                            <div id="markdown-preview" class="prose max-w-none text-sm text-subBlack font-medium"></div>
-                        </div>
+                        <button id="delete-note-btn" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-black text-xs rounded-xl border-2 border-deepBlack transition flex items-center space-x-1 shadow-[2px_2px_0px_0px_rgba(13,13,13,1)]" title="刪除目前筆記">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span class="hidden md:inline">刪除筆記</span>
+                        </button>
                     </div>
                 </div>
-            </main>
-        </div>
-    </div>
 
-    <!-- Firebase SDKs & App Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, get, push, remove, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBBDID8PF-0Ie-OKX9x4pQ3o0i49ozwH-8",
-            authDomain: "takenote-b7ec0.firebaseapp.com",
-            projectId: "takenote-b7ec0",
-            storageBucket: "takenote-b7ec0.firebasestorage.app",
-            messagingSenderId: "331345981558",
-            appId: "1:331345981558:web:0deaecad1900d8cb6a2f57",
-            measurementId: "G-SCVYMSQTRT"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-
-        // UI DOM Elements
-        const authScreen = document.getElementById('auth-screen');
-        const appScreen = document.getElementById('app-screen');
-        const loginForm = document.getElementById('login-form');
-        const loginEmail = document.getElementById('login-email');
-        const loginPassword = document.getElementById('login-password');
-        const authError = document.getElementById('auth-error');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userEmailDisplay = document.getElementById('user-email-display');
-        
-        const notesListEl = document.getElementById('notes-list');
-        const newNoteBtn = document.getElementById('new-note-btn');
-        const cleanOldNotesBtn = document.getElementById('clean-old-notes-btn');
-        const emptyState = document.getElementById('empty-state');
-        const editorContainer = document.getElementById('editor-container');
-        const titleInput = document.getElementById('note-title-input');
-        const tagsSelect = document.getElementById('note-tags-select');
-        const bodyInput = document.getElementById('note-body-input');
-        const previewEl = document.getElementById('markdown-preview');
-        const deleteBtn = document.getElementById('delete-note-btn');
-        const saveBtn = document.getElementById('save-note-btn');
-        const saveStatus = document.getElementById('save-status');
-        const lastSavedTimeEl = document.getElementById('last-saved-time');
-        const searchInput = document.getElementById('search-input');
-        const noteStats = document.getElementById('note-stats');
-
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
-
-        const exportExcelBtn = document.getElementById('export-excel-btn');
-        const importExcelInput = document.getElementById('import-excel-input');
-        const toggleStatsBtn = document.getElementById('toggle-stats-btn');
-        const closeStatsBtn = document.getElementById('close-stats-btn');
-        const statsPanel = document.getElementById('stats-panel');
-        const exportChartPngBtn = document.getElementById('export-chart-png-btn');
-
-        let currentUser = null;
-        let notesData = {};
-        let activeNoteId = null;
-        let saveTimeout = null;
-        let dailyChartInstance = null;
-        let tagChartInstance = null;
-
-        // 預覽與字數計算函數 (安全呼叫全域 marked.parse)
-        function updatePreviewAndStats() {
-            const text = bodyInput.value || '';
-            previewEl.innerHTML = window.marked ? window.marked.parse(text) : text;
-
-            const charCount = text.length;
-            const readTime = Math.ceil(charCount / 300);
-            noteStats.innerHTML = `<span>字數: <strong>${charCount}</strong></span><span>預估閱讀: <strong>${readTime}</strong> 分鐘</span>`;
-        }
-
-        // 雲端連線狀態監控
-        onValue(ref(db, '.info/connected'), (snap) => {
-            if (snap.val() === true) {
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-vibrantLime";
-                statusText.textContent = "雲端已連線";
-            } else {
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-vibrantOrange";
-                statusText.textContent = "離線狀態";
-            }
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                userEmailDisplay.textContent = user.email;
-                authScreen.classList.add('hidden');
-                appScreen.classList.remove('hidden');
-                loadNotes();
-            } else {
-                currentUser = null;
-                appScreen.classList.add('hidden');
-                authScreen.classList.remove('hidden');
-            }
-        });
-
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            authError.classList.add('hidden');
-            try {
-                await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-            } catch (error) {
-                authError.textContent = "登入失敗：請確認帳號密碼是否正確";
-                authError.classList.remove('hidden');
-            }
-        });
-
-        logoutBtn.addEventListener('click', () => signOut(auth));
-
-        async function loadNotes() {
-            if (!currentUser) return;
-            const notesRef = ref(db, `users/${currentUser.uid}/notes`);
-            const snapshot = await get(notesRef);
-            notesData = snapshot.exists() ? snapshot.val() : {};
-            renderNotesList();
-            renderCharts();
-        }
-
-        function renderNotesList(filterText = '') {
-            notesListEl.innerHTML = '';
-            const sortedIds = Object.keys(notesData).sort((a, b) => (notesData[b].updatedAt || 0) - (notesData[a].updatedAt || 0));
-
-            if (sortedIds.length === 0) {
-                notesListEl.innerHTML = `<div class="p-6 text-center text-xs font-bold text-subBlack/50">尚無筆記，請點擊新增</div>`;
-                return;
-            }
-
-            sortedIds.forEach(id => {
-                const note = notesData[id];
-                const title = note.title || '無標題筆記';
-                const body = note.body || '';
-                const tags = note.tags || '工作';
-
-                if (filterText && !title.toLowerCase().includes(filterText.toLowerCase()) && !body.toLowerCase().includes(filterText.toLowerCase()) && !tags.toLowerCase().includes(filterText.toLowerCase())) {
-                    return;
-                }
-
-                const dateStr = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
-                const isActive = id === activeNoteId;
-
-                const item = document.createElement('div');
-                item.className = `p-4 cursor-pointer transition ${isActive ? 'bg-vibrantLime/20 border-l-4 border-deepBlack font-black' : 'hover:bg-creamHover/60'}`;
-                item.innerHTML = `
-                    <div class="font-black text-sm text-deepBlack truncate mb-1">${escapeHtml(title)}</div>
-                    <div class="text-xs font-semibold text-subBlack/70 truncate mb-2">${escapeHtml(body.substring(0, 45))}</div>
-                    <div class="flex items-center justify-between text-[11px] font-bold text-subBlack/60">
-                        <span>${dateStr}</span>
-                        <span class="bg-vibrantOrange/20 text-deepBlack px-2 py-0.5 rounded border border-deepBlack/20">${escapeHtml(tags)}</span>
+                <!-- 標籤下拉選單與中繼資訊 -->
+                <div class="px-6 py-2.5 bg-creamHover/60 border-b-2 border-deepBlack flex items-center justify-between text-xs font-bold text-deepBlack shrink-0">
+                    <div class="flex items-center space-x-3 w-full">
+                        <i class="fa-solid fa-tags text-vibrantOrange"></i>
+                        <span class="font-black shrink-0">標籤選單:</span>
+                        <select id="note-tags-select" class="bg-creamBg border-2 border-deepBlack rounded-lg px-3 py-1 font-bold text-xs text-deepBlack focus:outline-none focus:ring-2 focus:ring-vibrantOrange cursor-pointer">
+                            <option value="工作">工作</option>
+                            <option value="個人成長">個人成長</option>
+                            <option value="理財">理財</option>
+                            <option value="健康">健康</option>
+                            <option value="運動">運動</option>
+                            <option value="生活">生活</option>
+                        </select>
                     </div>
-                `;
-                item.addEventListener('click', () => selectNote(id));
-                notesListEl.appendChild(item);
-            });
+                    <div id="note-stats" class="shrink-0 space-x-4 text-subBlack/70 font-bold">
+                        <span>字數: 0</span>
+                        <span>預估閱讀: 0 分鐘</span>
+                    </div>
+                </div>
+
+                <!-- 雙欄編輯與預覽 -->
+                <div class="flex-1 flex overflow-hidden">
+                    <div class="flex-1 flex flex-col border-r-2 border-deepBlack bg-creamBg">
+                        <textarea id="note-body-input" placeholder="撰寫 Markdown 內容..." class="flex-1 p-6 bg-transparent resize-none border-none focus:outline-none font-mono text-sm font-semibold leading-relaxed text-deepBlack placeholder:text-subBlack/30"></textarea>
+                    </div>
+                    <div class="flex-1 flex flex-col bg-creamCard overflow-y-auto p-6">
+                        <div id="markdown-preview" class="prose max-w-none text-sm text-subBlack font-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Firebase SDKs & App Logic -->
+<script type="module">
+    import { initializeApp } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js)";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js)";
+    import { getDatabase, ref, set, get, push, remove, update, onValue } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js)";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBBDID8PF-0Ie-OKX9x4pQ3o0i49ozwH-8",
+        authDomain: "takenote-b7ec0.firebaseapp.com",
+        projectId: "takenote-b7ec0",
+        storageBucket: "takenote-b7ec0.firebasestorage.app",
+        messagingSenderId: "331345981558",
+        appId: "1:331345981558:web:0deaecad1900d8cb6a2f57",
+        measurementId: "G-SCVYMSQTRT"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // UI DOM Elements
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app-screen');
+    const loginForm = document.getElementById('login-form');
+    const loginEmail = document.getElementById('login-email');
+    const loginPassword = document.getElementById('login-password');
+    const authError = document.getElementById('auth-error');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userEmailDisplay = document.getElementById('user-email-display');
+    
+    const notesListEl = document.getElementById('notes-list');
+    const newNoteBtn = document.getElementById('new-note-btn');
+    const cleanOldNotesBtn = document.getElementById('clean-old-notes-btn');
+    const emptyState = document.getElementById('empty-state');
+    const editorContainer = document.getElementById('editor-container');
+    const titleInput = document.getElementById('note-title-input');
+    const tagsSelect = document.getElementById('note-tags-select');
+    const bodyInput = document.getElementById('note-body-input');
+    const previewEl = document.getElementById('markdown-preview');
+    const deleteBtn = document.getElementById('delete-note-btn');
+    const saveBtn = document.getElementById('save-note-btn');
+    const saveStatus = document.getElementById('save-status');
+    const lastSavedTimeEl = document.getElementById('last-saved-time');
+    const searchInput = document.getElementById('search-input');
+    const noteStats = document.getElementById('note-stats');
+
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+
+    const exportExcelBtn = document.getElementById('export-excel-btn');
+    const importExcelInput = document.getElementById('import-excel-input');
+    const toggleStatsBtn = document.getElementById('toggle-stats-btn');
+    const closeStatsBtn = document.getElementById('close-stats-btn');
+    const statsPanel = document.getElementById('stats-panel');
+    const exportChartPngBtn = document.getElementById('export-chart-png-btn');
+
+    let currentUser = null;
+    let notesData = {};
+    let activeNoteId = null;
+    let saveTimeout = null;
+    let dailyChartInstance = null;
+    let tagChartInstance = null;
+
+    // 預覽與字數計算函數 (安全防禦檢查)
+    function updatePreviewAndStats() {
+        const text = bodyInput.value || '';
+        if (window.marked && typeof window.marked.parse === 'function') {
+            previewEl.innerHTML = window.marked.parse(text);
+        } else {
+            previewEl.textContent = text;
         }
 
-        newNoteBtn.addEventListener('click', async () => {
-            if (!currentUser) return;
-            const now = Date.now();
-            const newNote = {
-                title: '未命名專案筆記',
-                body: '# 新筆記\n\n在這裡開始記錄您的想法與計畫...',
-                tags: '工作',
-                createdAt: now,
-                updatedAt: now
-            };
-            const notesRef = ref(db, `users/${currentUser.uid}/notes`);
-            const newRef = push(notesRef);
-            await set(newRef, newNote);
-            activeNoteId = newRef.key;
-            await loadNotes();
-            selectNote(activeNoteId);
-        });
+        const charCount = text.length;
+        const readTime = Math.ceil(charCount / 300);
+        noteStats.innerHTML = `<span>字數: <strong>${charCount}</strong></span><span>預估閱讀: <strong>${readTime}</strong> 分鐘</span>`;
+    }
 
-        cleanOldNotesBtn.addEventListener('click', async () => {
-            if (!currentUser) return;
-            const days = prompt("請選擇要清理幾天前的舊筆記：\n輸入 30 (30天前), 90 (90天前), 或 180 (180天前)", "90");
-            if (!days || isNaN(days)) return;
+    // 雲端連線狀態監控
+    onValue(ref(db, '.info/connected'), (snap) => {
+        if (snap.val() === true) {
+            statusDot.className = "w-2.5 h-2.5 rounded-full bg-vibrantLime";
+            statusText.textContent = "雲端已連線";
+        } else {
+            statusDot.className = "w-2.5 h-2.5 rounded-full bg-vibrantOrange";
+            statusText.textContent = "離線狀態";
+        }
+    });
 
-            const cutoffTime = Date.now() - (parseInt(days) * 24 * 60 * 60 * 1000);
-            const idsToDelete = Object.keys(notesData).filter(id => {
-                const noteTime = notesData[id].updatedAt || notesData[id].createdAt || 0;
-                return noteTime < cutoffTime;
-            });
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            userEmailDisplay.textContent = user.email;
+            authScreen.classList.add('hidden');
+            appScreen.classList.remove('hidden');
+            loadNotes();
+        } else {
+            currentUser = null;
+            appScreen.classList.add('hidden');
+            authScreen.classList.remove('hidden');
+        }
+    });
 
-            if (idsToDelete.length === 0) {
-                alert(`沒有找到 ${days} 天前的舊筆記。`);
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        authError.classList.add('hidden');
+        try {
+            await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+        } catch (error) {
+            authError.textContent = "登入失敗：請確認帳號密碼是否正確";
+            authError.classList.remove('hidden');
+        }
+    });
+
+    logoutBtn.addEventListener('click', () => signOut(auth));
+
+    async function loadNotes() {
+        if (!currentUser) return;
+        const notesRef = ref(db, `users/${currentUser.uid}/notes`);
+        const snapshot = await get(notesRef);
+        notesData = snapshot.exists() ? snapshot.val() : {};
+        renderNotesList();
+        renderCharts();
+    }
+
+    function renderNotesList(filterText = '') {
+        notesListEl.innerHTML = '';
+        const sortedIds = Object.keys(notesData).sort((a, b) => (notesData[b].updatedAt || 0) - (notesData[a].updatedAt || 0));
+
+        if (sortedIds.length === 0) {
+            notesListEl.innerHTML = `<div class="p-6 text-center text-xs font-bold text-subBlack/50">尚無筆記，請點擊新增</div>`;
+            return;
+        }
+
+        sortedIds.forEach(id => {
+            const note = notesData[id];
+            const title = note.title || '無標題筆記';
+            const body = note.body || '';
+            const tags = note.tags || '工作';
+
+            if (filterText && !title.toLowerCase().includes(filterText.toLowerCase()) && !body.toLowerCase().includes(filterText.toLowerCase()) && !tags.toLowerCase().includes(filterText.toLowerCase())) {
                 return;
             }
 
-            if (confirm(`確定要永久刪除 ${idsToDelete.length} 篇超過 ${days} 天未更新的舊筆記嗎？`)) {
-                for (const id of idsToDelete) {
-                    const noteRef = ref(db, `users/${currentUser.uid}/notes/${id}`);
-                    await remove(noteRef);
-                    delete notesData[id];
-                }
-                if (activeNoteId && !notesData[activeNoteId]) {
-                    activeNoteId = null;
-                    editorContainer.classList.add('hidden');
-                    emptyState.classList.remove('hidden');
-                }
-                renderNotesList();
-                renderCharts();
-                alert(`成功清理 ${idsToDelete.length} 篇舊筆記！`);
-            }
+            const dateStr = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : '';
+            const isActive = id === activeNoteId;
+
+            const item = document.createElement('div');
+            item.className = `p-4 cursor-pointer transition ${isActive ? 'bg-vibrantLime/20 border-l-4 border-deepBlack font-black' : 'hover:bg-creamHover/60'}`;
+            item.innerHTML = `
+                <div class="font-black text-sm text-deepBlack truncate mb-1">${escapeHtml(title)}</div>
+                <div class="text-xs font-semibold text-subBlack/70 truncate mb-2">${escapeHtml(body.substring(0, 45))}</div>
+                <div class="flex items-center justify-between text-[11px] font-bold text-subBlack/60">
+                    <span>${dateStr}</span>
+                    <span class="bg-vibrantOrange/20 text-deepBlack px-2 py-0.5 rounded border border-deepBlack/20">${escapeHtml(tags)}</span>
+                </div>
+            `;
+            item.addEventListener('click', () => selectNote(id));
+            notesListEl.appendChild(item);
+        });
+    }
+
+    newNoteBtn.addEventListener('click', async () => {
+        if (!currentUser) return;
+        const now = Date.now();
+        const newNote = {
+            title: '未命名專案筆記',
+            body: '# 新筆記\n\n在這裡開始記錄您的想法與計畫...',
+            tags: '工作',
+            createdAt: now,
+            updatedAt: now
+        };
+        const notesRef = ref(db, `users/${currentUser.uid}/notes`);
+        const newRef = push(notesRef);
+        await set(newRef, newNote);
+        activeNoteId = newRef.key;
+        await loadNotes();
+        selectNote(activeNoteId);
+    });
+
+    cleanOldNotesBtn.addEventListener('click', async () => {
+        if (!currentUser) return;
+        const days = prompt("請選擇要清理幾天前的舊筆記：\n輸入 30 (30天前), 90 (90天前), 或 180 (180天前)", "90");
+        if (!days || isNaN(days)) return;
+
+        const cutoffTime = Date.now() - (parseInt(days) * 24 * 60 * 60 * 1000);
+        const idsToDelete = Object.keys(notesData).filter(id => {
+            const noteTime = notesData[id].updatedAt || notesData[id].createdAt || 0;
+            return noteTime < cutoffTime;
         });
 
-        function selectNote(id) {
-            activeNoteId = id;
-            const note = notesData[id];
-            if (!note) return;
-
-            emptyState.classList.add('hidden');
-            editorContainer.classList.remove('hidden');
-
-            titleInput.value = note.title || '';
-            tagsSelect.value = note.tags || '工作';
-            bodyInput.value = note.body || '';
-
-            if (note.updatedAt) {
-                const dateObj = new Date(note.updatedAt);
-                lastSavedTimeEl.textContent = `上次儲存: ${dateObj.toLocaleString('zh-TW', { hour12: false })}`;
-            } else {
-                lastSavedTimeEl.textContent = `上次儲存: 剛剛`;
-            }
-
-            saveStatus.textContent = "已儲存至雲端";
-            saveStatus.className = "text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
-
-            updatePreviewAndStats();
-            renderNotesList(searchInput.value);
+        if (idsToDelete.length === 0) {
+            alert(`沒有找到 ${days} 天前的舊筆記。`);
+            return;
         }
 
-        async function saveCurrentNoteToFirebase() {
-            if (!activeNoteId || !currentUser) return;
-
-            saveStatus.textContent = "儲存中...";
-            saveStatus.className = "text-xs font-black text-yellow-700 bg-yellow-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
-
-            const now = Date.now();
-            const updatedNote = {
-                ...notesData[activeNoteId],
-                title: titleInput.value,
-                tags: tagsSelect.value,
-                body: bodyInput.value,
-                updatedAt: now
-            };
-
-            notesData[activeNoteId] = updatedNote;
-            updatePreviewAndStats();
-            renderNotesList(searchInput.value);
-
-            try {
-                const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
-                await update(noteRef, updatedNote);
-
-                const dateObj = new Date(now);
-                lastSavedTimeEl.textContent = `上次儲存: ${dateObj.toLocaleString('zh-TW', { hour12: false })}`;
-                
-                saveStatus.textContent = "已儲存至雲端";
-                saveStatus.className = "text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
-                renderCharts();
-            } catch (err) {
-                saveStatus.textContent = "儲存失敗";
-                saveStatus.className = "text-xs font-black text-red-700 bg-red-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
-            }
-        }
-
-        function handleInputChanges() {
-            if (!activeNoteId || !currentUser) return;
-
-            saveStatus.textContent = "編輯中...";
-            saveStatus.className = "text-xs font-black text-orange-700 bg-orange-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
-
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                saveCurrentNoteToFirebase();
-            }, 1000);
-        }
-
-        titleInput.addEventListener('input', handleInputChanges);
-        tagsSelect.addEventListener('change', handleInputChanges);
-        bodyInput.addEventListener('input', handleInputChanges);
-
-        saveBtn.addEventListener('click', async () => {
-            clearTimeout(saveTimeout);
-            await saveCurrentNoteToFirebase();
-            
-            const originalHtml = saveBtn.innerHTML;
-            saveBtn.innerHTML = `<i class="fa-solid fa-check text-sm"></i><span>儲存成功</span>`;
-            saveBtn.classList.replace('bg-vibrantLime', 'bg-green-400');
-            
-            setTimeout(() => {
-                saveBtn.innerHTML = originalHtml;
-                saveBtn.classList.replace('bg-green-400', 'bg-vibrantLime');
-            }, 1500);
-        });
-
-        deleteBtn.addEventListener('click', async () => {
-            if (!activeNoteId || !currentUser) return;
-            if (confirm('確定要永久刪除目前這篇筆記嗎？')) {
-                const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
+        if (confirm(`確定要永久刪除 ${idsToDelete.length} 篇超過 ${days} 天未更新的舊筆記嗎？`)) {
+            for (const id of idsToDelete) {
+                const noteRef = ref(db, `users/${currentUser.uid}/notes/${id}`);
                 await remove(noteRef);
-                delete notesData[activeNoteId];
+                delete notesData[id];
+            }
+            if (activeNoteId && !notesData[activeNoteId]) {
                 activeNoteId = null;
                 editorContainer.classList.add('hidden');
                 emptyState.classList.remove('hidden');
-                renderNotesList();
-                renderCharts();
             }
-        });
-
-        searchInput.addEventListener('input', (e) => renderNotesList(e.target.value));
-
-        exportExcelBtn.addEventListener('click', () => {
-            const exportData = Object.keys(notesData).map(id => {
-                const n = notesData[id];
-                return {
-                    "筆記ID": id,
-                    "標題": n.title || '',
-                    "標籤": n.tags || '工作',
-                    "內容": n.body || '',
-                    "建立時間": n.createdAt ? new Date(n.createdAt).toLocaleString() : '',
-                    "更新時間": n.updatedAt ? new Date(n.updatedAt).toLocaleString() : ''
-                };
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "TakeNote筆記備份");
-            XLSX.writeFile(workbook, `TakeNote_Backup_${new Date().toISOString().slice(0,10)}.xlsx`);
-        });
-
-        importExcelInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file || !currentUser) return;
-
-            const reader = new FileReader();
-            reader.onload = async (evt) => {
-                const bstr = evt.target.result;
-                const workbook = XLSX.read(bstr, { type: 'binary' });
-                const sheetName = workbook.SheetNames[0];
-                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-                if (rows.length > 0 && confirm(`準備匯入 ${rows.length} 筆筆記，是否繼續？`)) {
-                    for (const row of rows) {
-                        const now = Date.now();
-                        const newNote = {
-                            title: row["標題"] || '匯入筆記',
-                            tags: row["標籤"] || '工作',
-                            body: row["內容"] || '',
-                            createdAt: now,
-                            updatedAt: now
-                        };
-                        const notesRef = ref(db, `users/${currentUser.uid}/notes`);
-                        const newRef = push(notesRef);
-                        await set(newRef, newNote);
-                    }
-                    alert("Excel 筆記匯入完成！");
-                    loadNotes();
-                }
-            };
-            reader.readAsBinaryString(file);
-        });
-
-        toggleStatsBtn.addEventListener('click', () => {
-            statsPanel.classList.remove('hidden');
+            renderNotesList();
             renderCharts();
+            alert(`成功清理 ${idsToDelete.length} 篇舊筆記！`);
+        }
+    });
+
+    function selectNote(id) {
+        activeNoteId = id;
+        const note = notesData[id];
+        if (!note) return;
+
+        emptyState.classList.add('hidden');
+        editorContainer.classList.remove('hidden');
+
+        titleInput.value = note.title || '';
+        tagsSelect.value = note.tags || '工作';
+        bodyInput.value = note.body || '';
+
+        if (note.updatedAt) {
+            const dateObj = new Date(note.updatedAt);
+            lastSavedTimeEl.textContent = `上次儲存: ${dateObj.toLocaleString('zh-TW', { hour12: false })}`;
+        } else {
+            lastSavedTimeEl.textContent = `上次儲存: 剛剛`;
+        }
+
+        saveStatus.textContent = "已儲存至雲端";
+        saveStatus.className = "text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+
+        updatePreviewAndStats();
+        renderNotesList(searchInput.value);
+    }
+
+    async function saveCurrentNoteToFirebase() {
+        if (!activeNoteId || !currentUser) return;
+
+        saveStatus.textContent = "儲存中...";
+        saveStatus.className = "text-xs font-black text-yellow-700 bg-yellow-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+
+        const now = Date.now();
+        const currentNote = notesData[activeNoteId] || {};
+        const updatedNote = {
+            title: titleInput.value,
+            tags: tagsSelect.value,
+            body: bodyInput.value,
+            createdAt: currentNote.createdAt || now,
+            updatedAt: now
+        };
+
+        notesData[activeNoteId] = updatedNote;
+        updatePreviewAndStats();
+        renderNotesList(searchInput.value);
+
+        try {
+            const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
+            await set(noteRef, updatedNote);
+
+            const dateObj = new Date(now);
+            lastSavedTimeEl.textContent = `上次儲存: ${dateObj.toLocaleString('zh-TW', { hour12: false })}`;
+            
+            saveStatus.textContent = "已儲存至雲端";
+            saveStatus.className = "text-xs font-black text-green-700 bg-green-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+            renderCharts();
+        } catch (err) {
+            console.error("儲存失敗:", err);
+            saveStatus.textContent = "儲存失敗";
+            saveStatus.className = "text-xs font-black text-red-700 bg-red-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+        }
+    }
+
+    function handleInputChanges() {
+        if (!activeNoteId || !currentUser) return; // 確保有選取筆記才動作
+
+        saveStatus.textContent = "編輯中...";
+        saveStatus.className = "text-xs font-black text-orange-700 bg-orange-100 px-2.5 py-0.5 rounded-md border border-deepBlack/20 inline-block";
+
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            saveCurrentNoteToFirebase();
+        }, 1000);
+    }
+
+    titleInput.addEventListener('input', handleInputChanges);
+    tagsSelect.addEventListener('change', handleInputChanges);
+    bodyInput.addEventListener('input', handleInputChanges);
+
+    saveBtn.addEventListener('click', async () => {
+        clearTimeout(saveTimeout);
+        await saveCurrentNoteToFirebase();
+        
+        const originalHtml = saveBtn.innerHTML;
+        saveBtn.innerHTML = `<i class="fa-solid fa-check text-sm"></i><span>儲存成功</span>`;
+        saveBtn.classList.replace('bg-vibrantLime', 'bg-green-400');
+        
+        setTimeout(() => {
+            saveBtn.innerHTML = originalHtml;
+            saveBtn.classList.replace('bg-green-400', 'bg-vibrantLime');
+        }, 1500);
+    });
+
+    deleteBtn.addEventListener('click', async () => {
+        if (!activeNoteId || !currentUser) return;
+        if (confirm('確定要永久刪除目前這篇筆記嗎？')) {
+            const noteRef = ref(db, `users/${currentUser.uid}/notes/${activeNoteId}`);
+            await remove(noteRef);
+            delete notesData[activeNoteId];
+            activeNoteId = null;
+            editorContainer.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            renderNotesList();
+            renderCharts();
+        }
+    });
+
+    searchInput.addEventListener('input', (e) => renderNotesList(e.target.value));
+
+    exportExcelBtn.addEventListener('click', () => {
+        const exportData = Object.keys(notesData).map(id => {
+            const n = notesData[id];
+            return {
+                "筆記ID": id,
+                "標題": n.title || '',
+                "標籤": n.tags || '工作',
+                "內容": n.body || '',
+                "建立時間": n.createdAt ? new Date(n.createdAt).toLocaleString() : '',
+                "更新時間": n.updatedAt ? new Date(n.updatedAt).toLocaleString() : ''
+            };
         });
-        closeStatsBtn.addEventListener('click', () => statsPanel.classList.add('hidden'));
 
-        function renderCharts() {
-            if (dailyChartInstance) dailyChartInstance.destroy();
-            if (tagChartInstance) tagChartInstance.destroy();
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "TakeNote筆記備份");
+        XLSX.writeFile(workbook, `TakeNote_Backup_${new Date().toISOString().slice(0,10)}.xlsx`);
+    });
 
-            const last7Days = [];
-            const dayCounts = {};
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const dateStr = d.toISOString().slice(0, 10);
-                last7Days.push(dateStr);
-                dayCounts[dateStr] = 0;
+    importExcelInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file || !currentUser) return;
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            const bstr = evt.target.result;
+            const workbook = XLSX.read(bstr, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+            if (rows.length > 0 && confirm(`準備匯入 ${rows.length} 筆筆記，是否繼續？`)) {
+                for (const row of rows) {
+                    const now = Date.now();
+                    const newNote = {
+                        title: row["標題"] || '匯入筆記',
+                        tags: row["標籤"] || '工作',
+                        body: row["內容"] || '',
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    const notesRef = ref(db, `users/${currentUser.uid}/notes`);
+                    const newRef = push(notesRef);
+                    await set(newRef, newNote);
+                }
+                alert("Excel 筆記匯入完成！");
+                loadNotes();
             }
+        };
+        reader.readAsBinaryString(file);
+    });
 
-            const tagCounts = { "工作": 0, "個人成長": 0, "理財": 0, "健康": 0, "運動": 0, "生活": 0 };
+    toggleStatsBtn.addEventListener('click', () => {
+        statsPanel.classList.remove('hidden');
+        renderCharts();
+    });
+    closeStatsBtn.addEventListener('click', () => statsPanel.classList.add('hidden'));
 
-            Object.values(notesData).forEach(n => {
-                const dateKey = new Date(n.createdAt || n.updatedAt || Date.now()).toISOString().slice(0, 10);
-                if (dayCounts[dateKey] !== undefined) dayCounts[dateKey]++;
-                const tagKey = n.tags || "工作";
-                if (tagCounts[tagKey] !== undefined) tagCounts[tagKey]++;
-                else tagCounts["工作"]++;
-            });
+    function renderCharts() {
+        if (dailyChartInstance) dailyChartInstance.destroy();
+        if (tagChartInstance) tagChartInstance.destroy();
 
-            const ctx1 = document.getElementById('dailyChart').getContext('2d');
-            dailyChartInstance = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: last7Days,
-                    datasets: [{
-                        label: '新增筆記數',
-                        data: last7Days.map(d => dayCounts[d]),
-                        backgroundColor: '#f97316',
-                        borderColor: '#0d0d0d',
-                        borderWidth: 2
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } }
-            });
-
-            const ctx2 = document.getElementById('tagChart').getContext('2d');
-            tagChartInstance = new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(tagCounts),
-                    datasets: [{
-                        data: Object.values(tagCounts),
-                        backgroundColor: ['#84cc16', '#f97316', '#eab308', '#06b6d4', '#a855f7', '#ec4899'],
-                        borderColor: '#0d0d0d',
-                        borderWidth: 2
-                    }]
-                },
-                options: { responsive: true }
-            });
+        const last7Days = [];
+        const dayCounts = {};
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = d.toISOString().slice(0, 10);
+            last7Days.push(dateStr);
+            dayCounts[dateStr] = 0;
         }
 
-        exportChartPngBtn.addEventListener('click', () => {
-            const chartNode = document.getElementById('dailyChart');
-            const imageURI = chartNode.toDataURL("image/png");
-            const link = document.createElement('a');
-            link.download = `TakeNote_DailyStats_${new Date().toISOString().slice(0,10)}.png`;
-            link.href = imageURI;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        const tagCounts = { "工作": 0, "個人成長": 0, "理財": 0, "健康": 0, "運動": 0, "生活": 0 };
+
+        Object.values(notesData).forEach(n => {
+            const dateKey = new Date(n.createdAt || n.updatedAt || Date.now()).toISOString().slice(0, 10);
+            if (dayCounts[dateKey] !== undefined) dayCounts[dateKey]++;
+            const tagKey = n.tags || "工作";
+            if (tagCounts[tagKey] !== undefined) tagCounts[tagKey]++;
+            else tagCounts["工作"]++;
         });
 
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-    </script>
-</body>
-</html>
+        const ctx1 = document.getElementById('dailyChart').getContext('2d');
+        dailyChartInstance = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: last7Days,
+                datasets: [{
+                    label: '新增筆記數',
+                    data: last7Days.map(d => dayCounts[d]),
+                    backgroundColor: '#f97316',
+                    borderColor: '#0d0d0d',
+                    borderWidth: 2
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        const ctx2 = document.getElementById('tagChart').getContext('2d');
+        tagChartInstance = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(tagCounts),
+                datasets: [{
+                    data: Object.values(tagCounts),
+                    backgroundColor: ['#84cc16', '#f97316', '#eab308', '#06b6d4', '#a855f7', '#ec4899'],
+                    borderColor: '#0d0d0d',
+                    borderWidth: 2
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
+    exportChartPngBtn.addEventListener('click', () => {
+        const chartNode = document.getElementById('dailyChart');
+        const imageURI = chartNode.toDataURL("image/png");
+        const link = document.createElement('a');
+        link.download = `TakeNote_DailyStats_${new Date().toISOString().slice(0,10)}.png`;
+        link.href = imageURI;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+</script>
