@@ -27,8 +27,8 @@
             }
         }
     </script>
-    <!-- Marked.js for Markdown Rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.js"></script>
+    <!-- Marked.js (穩定全域版本) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- SheetJS (XLSX) for Excel Import/Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Chart.js for Statistics -->
@@ -317,10 +317,11 @@
         let dailyChartInstance = null;
         let tagChartInstance = null;
 
-        // **正確宣告與定義 updatePreviewAndStats() 函數**
+        // 預覽與字數計算函數
         function updatePreviewAndStats() {
             const text = bodyInput.value || '';
-            previewEl.innerHTML = marked.parse(text);
+            // 使用 window.marked.parse 確保全域呼叫正確
+            previewEl.innerHTML = window.marked ? window.marked.parse(text) : text;
 
             const charCount = text.length;
             const readTime = Math.ceil(charCount / 300);
